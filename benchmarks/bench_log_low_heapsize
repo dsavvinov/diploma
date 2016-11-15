@@ -1,0 +1,472 @@
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.boxedStaticInlinedJava
+
+# Run progress: 0.00% complete, ETA 00:04:30
+# Fork: 1 of 1
+# Warmup Iteration   1: 567.418 us/op
+# Warmup Iteration   2: 507.503 us/op
+# Warmup Iteration   3: 520.706 us/op
+# Warmup Iteration   4: 506.468 us/op
+# Warmup Iteration   5: 495.178 us/op
+# Warmup Iteration   6: 482.049 us/op
+# Warmup Iteration   7: 499.189 us/op
+# Warmup Iteration   8: 503.788 us/op
+# Warmup Iteration   9: 503.112 us/op
+# Warmup Iteration  10: 490.293 us/op
+# Warmup Iteration  11: 490.522 us/op
+# Warmup Iteration  12: 494.832 us/op
+# Warmup Iteration  13: 499.147 us/op
+# Warmup Iteration  14: 511.057 us/op
+# Warmup Iteration  15: 499.177 us/op
+# Warmup Iteration  16: 501.091 us/op
+# Warmup Iteration  17: 504.581 us/op
+# Warmup Iteration  18: 499.805 us/op
+# Warmup Iteration  19: 502.101 us/op
+# Warmup Iteration  20: 496.094 us/op
+Iteration   1: 488.111 us/op
+Iteration   2: 500.223 us/op
+Iteration   3: 516.532 us/op
+Iteration   4: 516.825 us/op
+Iteration   5: 507.756 us/op
+Iteration   6: 494.633 us/op
+Iteration   7: 513.833 us/op
+Iteration   8: 513.766 us/op
+Iteration   9: 496.417 us/op
+Iteration  10: 513.513 us/op
+
+
+Result "boxedStaticInlinedJava":
+  506.161 ±(99.9%) 15.804 us/op [Average]
+  (min, avg, max) = (488.111, 506.161, 516.825), stdev = 10.454
+  CI (99.9%): [490.357, 521.965] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.javaFused
+
+# Run progress: 11.11% complete, ETA 00:04:03
+# Fork: 1 of 1
+# Warmup Iteration   1: 38.588 us/op
+# Warmup Iteration   2: 37.019 us/op
+# Warmup Iteration   3: 34.667 us/op
+# Warmup Iteration   4: 36.023 us/op
+# Warmup Iteration   5: 33.125 us/op
+# Warmup Iteration   6: 32.759 us/op
+# Warmup Iteration   7: 32.160 us/op
+# Warmup Iteration   8: 32.198 us/op
+# Warmup Iteration   9: 32.054 us/op
+# Warmup Iteration  10: 32.154 us/op
+# Warmup Iteration  11: 32.165 us/op
+# Warmup Iteration  12: 32.125 us/op
+# Warmup Iteration  13: 32.211 us/op
+# Warmup Iteration  14: 32.373 us/op
+# Warmup Iteration  15: 32.023 us/op
+# Warmup Iteration  16: 32.187 us/op
+# Warmup Iteration  17: 32.099 us/op
+# Warmup Iteration  18: 32.044 us/op
+# Warmup Iteration  19: 32.170 us/op
+# Warmup Iteration  20: 31.947 us/op
+Iteration   1: 32.009 us/op
+Iteration   2: 32.188 us/op
+Iteration   3: 32.116 us/op
+Iteration   4: 32.023 us/op
+Iteration   5: 32.361 us/op
+Iteration   6: 32.050 us/op
+Iteration   7: 32.276 us/op
+Iteration   8: 34.550 us/op
+Iteration   9: 31.996 us/op
+Iteration  10: 38.234 us/op
+
+
+Result "javaFused":
+  32.980 ±(99.9%) 3.024 us/op [Average]
+  (min, avg, max) = (31.996, 32.980, 38.234), stdev = 2.000
+  CI (99.9%): [29.956, 36.005] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.javaStream
+
+# Run progress: 22.22% complete, ETA 00:03:33
+# Fork: 1 of 1
+# Warmup Iteration   1: 477.031 us/op
+# Warmup Iteration   2: 457.322 us/op
+# Warmup Iteration   3: 526.301 us/op
+# Warmup Iteration   4: 714.696 us/op
+# Warmup Iteration   5: 552.317 us/op
+# Warmup Iteration   6: 527.541 us/op
+# Warmup Iteration   7: 508.829 us/op
+# Warmup Iteration   8: 663.311 us/op
+# Warmup Iteration   9: 605.496 us/op
+# Warmup Iteration  10: 718.507 us/op
+# Warmup Iteration  11: 524.391 us/op
+# Warmup Iteration  12: 516.759 us/op
+# Warmup Iteration  13: 570.657 us/op
+# Warmup Iteration  14: 502.406 us/op
+# Warmup Iteration  15: 572.133 us/op
+# Warmup Iteration  16: 580.363 us/op
+# Warmup Iteration  17: 538.510 us/op
+# Warmup Iteration  18: 524.213 us/op
+# Warmup Iteration  19: 479.746 us/op
+# Warmup Iteration  20: 497.224 us/op
+Iteration   1: 494.756 us/op
+Iteration   2: 454.525 us/op
+Iteration   3: 500.647 us/op
+Iteration   4: 456.987 us/op
+Iteration   5: 435.314 us/op
+Iteration   6: 533.786 us/op
+Iteration   7: 500.527 us/op
+Iteration   8: 478.377 us/op
+Iteration   9: 463.819 us/op
+Iteration  10: 538.298 us/op
+
+
+Result "javaStream":
+  485.704 ±(99.9%) 51.570 us/op [Average]
+  (min, avg, max) = (435.314, 485.704, 538.298), stdev = 34.110
+  CI (99.9%): [434.134, 537.273] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.javaUnboxedStream
+
+# Run progress: 33.33% complete, ETA 00:03:02
+# Fork: 1 of 1
+# Warmup Iteration   1: 188.783 us/op
+# Warmup Iteration   2: 233.566 us/op
+# Warmup Iteration   3: 214.505 us/op
+# Warmup Iteration   4: 213.729 us/op
+# Warmup Iteration   5: 238.072 us/op
+# Warmup Iteration   6: 228.216 us/op
+# Warmup Iteration   7: 236.578 us/op
+# Warmup Iteration   8: 277.351 us/op
+# Warmup Iteration   9: 310.663 us/op
+# Warmup Iteration  10: 226.726 us/op
+# Warmup Iteration  11: 228.136 us/op
+# Warmup Iteration  12: 227.477 us/op
+# Warmup Iteration  13: 220.729 us/op
+# Warmup Iteration  14: 214.753 us/op
+# Warmup Iteration  15: 181.868 us/op
+# Warmup Iteration  16: 182.291 us/op
+# Warmup Iteration  17: 180.837 us/op
+# Warmup Iteration  18: 178.751 us/op
+# Warmup Iteration  19: 184.416 us/op
+# Warmup Iteration  20: 178.598 us/op
+Iteration   1: 177.651 us/op
+Iteration   2: 181.006 us/op
+Iteration   3: 196.826 us/op
+Iteration   4: 177.783 us/op
+Iteration   5: 196.168 us/op
+Iteration   6: 177.555 us/op
+Iteration   7: 192.755 us/op
+Iteration   8: 197.624 us/op
+Iteration   9: 201.046 us/op
+Iteration  10: 198.746 us/op
+
+
+Result "javaUnboxedStream":
+  189.716 ±(99.9%) 14.997 us/op [Average]
+  (min, avg, max) = (177.555, 189.716, 201.046), stdev = 9.920
+  CI (99.9%): [174.719, 204.713] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.kotlinChain
+
+# Run progress: 44.44% complete, ETA 00:02:32
+# Fork: 1 of 1
+# Warmup Iteration   1: 848.964 us/op
+# Warmup Iteration   2: 704.033 us/op
+# Warmup Iteration   3: 711.030 us/op
+# Warmup Iteration   4: 666.509 us/op
+# Warmup Iteration   5: 687.522 us/op
+# Warmup Iteration   6: 649.485 us/op
+# Warmup Iteration   7: 655.882 us/op
+# Warmup Iteration   8: 859.045 us/op
+# Warmup Iteration   9: 895.596 us/op
+# Warmup Iteration  10: 641.726 us/op
+# Warmup Iteration  11: 622.785 us/op
+# Warmup Iteration  12: 697.045 us/op
+# Warmup Iteration  13: 610.988 us/op
+# Warmup Iteration  14: 633.553 us/op
+# Warmup Iteration  15: 899.120 us/op
+# Warmup Iteration  16: 658.973 us/op
+# Warmup Iteration  17: 625.207 us/op
+# Warmup Iteration  18: 690.975 us/op
+# Warmup Iteration  19: 647.153 us/op
+# Warmup Iteration  20: 641.250 us/op
+Iteration   1: 645.863 us/op
+Iteration   2: 642.500 us/op
+Iteration   3: 665.574 us/op
+Iteration   4: 717.292 us/op
+Iteration   5: 1030.389 us/op
+Iteration   6: 899.927 us/op
+Iteration   7: 662.049 us/op
+Iteration   8: 691.514 us/op
+Iteration   9: 676.799 us/op
+Iteration  10: 717.837 us/op
+
+
+Result "kotlinChain":
+  734.974 ±(99.9%) 193.209 us/op [Average]
+  (min, avg, max) = (642.500, 734.974, 1030.389), stdev = 127.796
+  CI (99.9%): [541.765, 928.183] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.kotlinFused
+
+# Run progress: 55.56% complete, ETA 00:02:01
+# Fork: 1 of 1
+# Warmup Iteration   1: 39.083 us/op
+# Warmup Iteration   2: 35.945 us/op
+# Warmup Iteration   3: 41.517 us/op
+# Warmup Iteration   4: 36.276 us/op
+# Warmup Iteration   5: 34.411 us/op
+# Warmup Iteration   6: 34.029 us/op
+# Warmup Iteration   7: 33.200 us/op
+# Warmup Iteration   8: 33.227 us/op
+# Warmup Iteration   9: 34.199 us/op
+# Warmup Iteration  10: 36.591 us/op
+# Warmup Iteration  11: 35.219 us/op
+# Warmup Iteration  12: 33.216 us/op
+# Warmup Iteration  13: 35.344 us/op
+# Warmup Iteration  14: 37.173 us/op
+# Warmup Iteration  15: 35.285 us/op
+# Warmup Iteration  16: 39.157 us/op
+# Warmup Iteration  17: 34.091 us/op
+# Warmup Iteration  18: 33.047 us/op
+# Warmup Iteration  19: 33.019 us/op
+# Warmup Iteration  20: 33.170 us/op
+Iteration   1: 33.276 us/op
+Iteration   2: 33.143 us/op
+Iteration   3: 33.067 us/op
+Iteration   4: 33.125 us/op
+Iteration   5: 33.123 us/op
+Iteration   6: 33.390 us/op
+Iteration   7: 33.145 us/op
+Iteration   8: 34.447 us/op
+Iteration   9: 33.521 us/op
+Iteration  10: 33.151 us/op
+
+
+Result "kotlinFused":
+  33.339 ±(99.9%) 0.627 us/op [Average]
+  (min, avg, max) = (33.067, 33.339, 34.447), stdev = 0.414
+  CI (99.9%): [32.712, 33.965] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.kotlinStream
+
+# Run progress: 66.67% complete, ETA 00:01:31
+# Fork: 1 of 1
+# Warmup Iteration   1: 737.560 us/op
+# Warmup Iteration   2: 611.922 us/op
+# Warmup Iteration   3: 613.021 us/op
+# Warmup Iteration   4: 625.398 us/op
+# Warmup Iteration   5: 594.688 us/op
+# Warmup Iteration   6: 595.267 us/op
+# Warmup Iteration   7: 646.971 us/op
+# Warmup Iteration   8: 624.145 us/op
+# Warmup Iteration   9: 620.595 us/op
+# Warmup Iteration  10: 591.506 us/op
+# Warmup Iteration  11: 615.936 us/op
+# Warmup Iteration  12: 605.437 us/op
+# Warmup Iteration  13: 580.201 us/op
+# Warmup Iteration  14: 624.064 us/op
+# Warmup Iteration  15: 693.802 us/op
+# Warmup Iteration  16: 612.593 us/op
+# Warmup Iteration  17: 597.692 us/op
+# Warmup Iteration  18: 630.280 us/op
+# Warmup Iteration  19: 604.178 us/op
+# Warmup Iteration  20: 601.834 us/op
+Iteration   1: 620.710 us/op
+Iteration   2: 609.694 us/op
+Iteration   3: 605.834 us/op
+Iteration   4: 643.633 us/op
+Iteration   5: 601.794 us/op
+Iteration   6: 621.731 us/op
+Iteration   7: 596.061 us/op
+Iteration   8: 631.581 us/op
+Iteration   9: 642.330 us/op
+Iteration  10: 631.587 us/op
+
+
+Result "kotlinStream":
+  620.495 ±(99.9%) 25.388 us/op [Average]
+  (min, avg, max) = (596.061, 620.495, 643.633), stdev = 16.793
+  CI (99.9%): [595.107, 645.884] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.naiveBaselineJava
+
+# Run progress: 77.78% complete, ETA 00:01:00
+# Fork: 1 of 1
+# Warmup Iteration   1: 696.870 us/op
+# Warmup Iteration   2: 601.284 us/op
+# Warmup Iteration   3: 631.307 us/op
+# Warmup Iteration   4: 624.643 us/op
+# Warmup Iteration   5: 624.955 us/op
+# Warmup Iteration   6: 626.286 us/op
+# Warmup Iteration   7: 689.369 us/op
+# Warmup Iteration   8: 675.577 us/op
+# Warmup Iteration   9: 757.280 us/op
+# Warmup Iteration  10: 971.646 us/op
+# Warmup Iteration  11: 695.990 us/op
+# Warmup Iteration  12: 842.581 us/op
+# Warmup Iteration  13: 672.594 us/op
+# Warmup Iteration  14: 980.656 us/op
+# Warmup Iteration  15: 865.171 us/op
+# Warmup Iteration  16: 783.910 us/op
+# Warmup Iteration  17: 652.411 us/op
+# Warmup Iteration  18: 703.482 us/op
+# Warmup Iteration  19: 613.330 us/op
+# Warmup Iteration  20: 817.843 us/op
+Iteration   1: 648.275 us/op
+Iteration   2: 635.899 us/op
+Iteration   3: 620.641 us/op
+Iteration   4: 618.795 us/op
+Iteration   5: 633.371 us/op
+Iteration   6: 660.702 us/op
+Iteration   7: 690.894 us/op
+Iteration   8: 638.423 us/op
+Iteration   9: 604.737 us/op
+Iteration  10: 612.194 us/op
+
+
+Result "naiveBaselineJava":
+  636.393 ±(99.9%) 38.583 us/op [Average]
+  (min, avg, max) = (604.737, 636.393, 690.894), stdev = 25.520
+  CI (99.9%): [597.810, 674.976] (assumes normal distribution)
+
+
+# JMH 1.15 (released 46 days ago)
+# VM version: JDK 1.8.0_101, VM 25.101-b13
+# VM invoker: /usr/lib/jvm/java-8-oracle/jre/bin/java
+# VM options: -Xmx8m
+# Warmup: 20 iterations, 1 s each
+# Measurement: 10 iterations, 1 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Average time, time/op
+# Benchmark: org.sample.MyBenchmark.unboxedStaticInlinedJava
+
+# Run progress: 88.89% complete, ETA 00:00:30
+# Fork: 1 of 1
+# Warmup Iteration   1: 142.625 us/op
+# Warmup Iteration   2: 129.155 us/op
+# Warmup Iteration   3: 132.979 us/op
+# Warmup Iteration   4: 134.973 us/op
+# Warmup Iteration   5: 146.996 us/op
+# Warmup Iteration   6: 130.487 us/op
+# Warmup Iteration   7: 127.293 us/op
+# Warmup Iteration   8: 128.895 us/op
+# Warmup Iteration   9: 129.039 us/op
+# Warmup Iteration  10: 130.860 us/op
+# Warmup Iteration  11: 129.535 us/op
+# Warmup Iteration  12: 127.058 us/op
+# Warmup Iteration  13: 129.935 us/op
+# Warmup Iteration  14: 131.221 us/op
+# Warmup Iteration  15: 182.488 us/op
+# Warmup Iteration  16: 139.401 us/op
+# Warmup Iteration  17: 129.799 us/op
+# Warmup Iteration  18: 130.045 us/op
+# Warmup Iteration  19: 130.752 us/op
+# Warmup Iteration  20: 136.725 us/op
+Iteration   1: 129.115 us/op
+Iteration   2: 172.483 us/op
+Iteration   3: 130.728 us/op
+Iteration   4: 132.389 us/op
+Iteration   5: 130.098 us/op
+Iteration   6: 131.757 us/op
+Iteration   7: 128.150 us/op
+Iteration   8: 127.733 us/op
+Iteration   9: 129.180 us/op
+Iteration  10: 131.885 us/op
+
+
+Result "unboxedStaticInlinedJava":
+  134.352 ±(99.9%) 20.398 us/op [Average]
+  (min, avg, max) = (127.733, 134.352, 172.483), stdev = 13.492
+  CI (99.9%): [113.954, 154.750] (assumes normal distribution)
+
+
+# Run complete. Total time: 00:04:34
+
+Benchmark                             Mode  Cnt    Score     Error  Units
+MyBenchmark.boxedStaticInlinedJava    avgt   10  506.161 ±  15.804  us/op
+MyBenchmark.javaFused                 avgt   10   32.980 ±   3.024  us/op
+MyBenchmark.javaStream                avgt   10  485.704 ±  51.570  us/op
+MyBenchmark.javaUnboxedStream         avgt   10  189.716 ±  14.997  us/op
+MyBenchmark.kotlinChain               avgt   10  734.974 ± 193.209  us/op
+MyBenchmark.kotlinFused               avgt   10   33.339 ±   0.627  us/op
+MyBenchmark.kotlinStream              avgt   10  620.495 ±  25.388  us/op
+MyBenchmark.naiveBaselineJava         avgt   10  636.393 ±  38.583  us/op
+MyBenchmark.unboxedStaticInlinedJava  avgt   10  134.352 ±  20.398  us/op
