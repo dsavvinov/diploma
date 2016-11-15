@@ -1,0 +1,132 @@
+/** NUMBER I **/
+
+Effect: foo(x: Any?): Any? = {
+  x is Any ⟶ hints Any
+  x == null ⟶ returns null
+}
+
+Effect: <R> run(block: () -> R): R = {
+  (∀ R block : () -> R) → Effect(block)()
+}
+
+In call site:
+Effect(run)<Boolean>( { foo(null) } )
+  ↦ {
+    { foo(null) } : () -> Boolean ⟶ Effect { foo(null) }()
+  }
+  // reducing... 
+  ↦ Effect { .. } ()
+  ↦ // ... dark magic here ...
+  ↦ Effect (foo)(null)
+  ↦ {
+    null is Any ⟶ hints Any
+    null == null ⟶ return null
+  }
+  // reducing...
+  ↦ {
+    return null
+  }
+
+// =============================================================================
+
+
+
+Effect: assert(cond: Boolean): Unit = {
+  cond == true ⟶ returns Unit
+  cond == false ⟶ throws AssertionException
+}
+
+Effect: bar(x : Any?): Boolean = {
+  x is Any ⟶ returns true
+  x == false ⟶ returns false
+}
+
+In call site:
+Effect(assert)(bar(null)) 
+  ↦ {
+    bar(null) == true ⟶ returns Unit
+    bar(null) == false ⟶ throws AssertionException
+  }
+  /**
+  'bar(null) == true' -- is it true Premise?
+  
+  Effect(bar)(null) ↦ { 
+    null is Any ⟶ return True
+    null == null ⟶ return False
+  } ↦ { return False }
+  
+  '{ returns False } == true' -- ofc it's false premise!
+  
+  '{ returns False } == false' -- that's the true premise! 
+  
+  So, we have:
+  **/
+  ↦ { throws AssertionException }
+  
+In call site: 
+Effect(assert)(foo(null) != null) 
+  ↦ {
+    (foo(null) != null) == true ⟶ returns Unit
+    (foo(null) != null) == false ⟶ throws AssertionException
+  } 
+  // reducing foo(null)
+  ↦ {
+    (null != null) == true ⟶ returns Unit
+    (null != null) == false ⟶ throws AssertionException
+  }
+  // reducing ==
+  ↦ {
+    false == true ⟶ returns Unit
+    false == false ⟶ throws AssertionException
+  }
+  // reducing false premises
+  ↦ { throws  AssertionException }
+
+// ============================================================================
+
+Effect: <T> filter(receiver: List<T>, p: T -> Boolean) = {
+  (receiver is List<T>, p is T -> Boolean) ⟶ hints List<p! @ True . type(arg1) >
+}
+
+In call site:
+filter! <Any?> list { it is String } ↦ {
+  list is List<Any?>, { it is String } is Any? -> Boolean ⟶ hints List< {it is String}! @ type(arg1) >
+}
+  // premise is ok
+  ↦ {
+    hints List< { it is String }! @ True . type(arg1) >
+  }
+  ↦ {
+    hints List < {
+      it is String ⟶ True
+      it is ¬String ⟶ False
+    } @True . type(arg1) >
+  }
+  ↦ {
+    hints List < (arg1 is String).type(arg1) >
+  }
+  ↦ {
+    hints List < String > 
+  }
+  
+// ============================================================================
+
+Effect : baz(t : Any?) : Any? = {
+  t == null ⟶ returns null
+  t is Any ⟶ returns 5
+}
+
+In call site:
+baz! (5) ↦ {
+  5 == null ⟶ returns null
+  5 is Any ⟶ returns 5
+}
+  // reducing
+  ↦ { returns 5 }
+
+  
+  
+  
+
+
+

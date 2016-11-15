@@ -1,0 +1,132 @@
+Effect: isNull(x: Any?): Boolean {
+  x == null ⟶ True
+  x is Any ⟶ False
+}
+
+Effect: isNotNull(x : Any?): Boolean {
+  is == null ⟶ True
+  x is Any ⟶ False
+}
+
+Effect: assert(cond: Boolean): Unit {
+  cond == True ⟶ return Unit
+  cond == False ⟶ throws AssertionException
+}
+
+In call site:
+assert! (isNull(x) == isNotNull(x)) 
+  ↦ {
+    (isNull(x) == isNotNull(x)) == true ⟶ return Unit
+    (isNull(x) == isNotNull(x)) == false ⟶ throw AssertionException
+  }
+  // Evaluate left arg, i.e. (isNull(x) == isNotNull(x))
+  // =====================
+      isNull(x) == isNotNull(x) ↦ 
+      // Evaluate left arg, i.e. isNull(x)
+      // ====================
+          isNull! (x) ↦ {
+            x == null ⟶ True
+            x is Any ⟶ False
+          }
+      // ====================
+      
+      // Evaluate right arg, i.e. isNotNull(x)
+      // ====================
+          isNotNull (x) ↦ {
+            x == null ⟶ False
+            x is Any ⟶ True
+          }
+      // ====================
+      
+      // Compose two effects
+      isNull(x) == isNotNull(x) ↦ {
+        x == null ⟶ /* True == False */ False
+        x is Any ⟶ /* False == True */ False
+      }
+  // ====================
+  ↦ {
+    x == Null ⟶ /* False == False ⟶ True */ ⟶ throw AssertionException
+    x is Any ⟶ /* False == False ⟶ True */ ⟶ throw AssertionException
+  }
+
+
+// ==============================================================
+
+Effect: churchIf(condition: Boolean, trueBranch : () -> Unit, falseBranch : () -> Unit) = {
+  condition == true ⟶ trueBranch()
+  condition == false ⟶ falseBranch()
+}
+
+churchIf! isNotNull(null) { throw AssertionException } { makePizza() }
+  ↦ {
+    isNotNull(null) == true ⟶ trueBranch()
+    isNotNull(null) == false ⟶ falseBranch()
+  }
+  //=================
+      isNotNull! null {
+        null == null ⟶ False
+        null is Any ⟶ True
+      } ↦ { returns False }
+  //=================
+  ↦ {
+    False == True ⟶ trueBranch()
+    False == False ⟶ falseBranch()
+  } ↦ falseBranch! () {
+    () ⟶ returns Unit
+  }
+  
+// ==================================================================
+
+Effect: throwIfNull(x : Any?) = {
+  x is null ⟶ throw KNPE
+  x is Any? ⟶ return Unit
+}
+
+Effect: midList(x : List<*>?): List<Any?> = {
+  x is null ⟶ throwIfNull! x
+  x is Any? ⟶ return List< { it is String }! @ True . type >
+} ↦ {
+  x is null ⟶ throw KNPE
+  x is Any? ⟶ return List< String > 
+}
+
+Effect: midInt(x : Int?): Int? {
+  x is null ⟶ return null
+  x is Int? ⟶ [return x + 1, hint Int]
+}
+
+Effect: midString(x : Stirng?): Int? {
+  x is null ⟶ return null
+  x is String? ⟶ return String.length! x
+}
+
+Effect: top(x: Any?): Any? {
+  x is String? ⟶ midString! x
+  x is Int? ⟶ midInt! x
+  x is List<*>? ⟶ midList! x
+  x is Any? ⟶ return null
+}
+
+Call site:
+top! null ↦ {
+  null is String? ⟶ midString! x
+  null is Int? ⟶ midInt! x
+  null is List<*>? ⟶ midList! x
+  null is Any? ⟶ return null
+} ↦ midString! null ↦ {
+  null is null ⟶ return null
+  null is Stirng? ⟶ return String.length! x
+} ↦ return null
+
+
+top! 5 ↦ midInt! 5 ↦ {
+  5 is null ⟶ return null
+  5 is Int? ⟶ return 5 + 1
+} ↦ 5 + 1 (6?)
+
+
+top! lst ↦ {
+  lst is null ⟶ throwIfNull! x
+  lst is List<*>? ⟶ return List<String>
+} ↦ { return List<String>}
+
