@@ -14,15 +14,13 @@ fun dispatch(obj: Any?) {
         processNullArg()
         return
     }
-
     // now obj has type "Any" (we statically know that it can't be null)
     val nonNullObj: Any = obj
-
     when (nonNullObj) {
-        is String -> processStringArg(nonNullObj)   // smartcasted to String
-        is Int -> processIntArg(nonNullObj)         // smartcasted to Int
+        // smartcasted to String
+        is String -> processStringArg(nonNullObj)
+        // smartcasted to Int
+        is Int -> processIntArg(nonNullObj)
         // ...
     }
-
-    // Cool! Ave, Kotlin!
 }

@@ -38,9 +38,9 @@ fun testChurchIf() {
 
 // ==============================================
 
-fun top(x: Any?): Any? {
+fun dispatch(x: Any?): Any? {
     if (x is String?) {
-        return midString(x)
+        return procString(x)
     } else if (x is Int?) {
         return midInt(x)
     } else if (x is List<*>?) {
@@ -50,7 +50,7 @@ fun top(x: Any?): Any? {
     }
 }
 
-fun midString(x: String?): Int? {
+fun procString(x: String?): Int? {
     if (x == null) {
         return null
     } else return x.length
@@ -79,7 +79,7 @@ fun throwIfNull(x: Any?) {
 
 
 fun callSite() {
-    top(null) // returns null (doesn't throw!)
-    top(5) // returns 6
-    top(listOf<Any>(5, "hello", 8, 12, "5", "foo")) // returns List<String>
+    dispatch(null) // returns null (doesn't throw!)
+    dispatch(5) // returns 6
+    dispatch(listOf<Any>(5, "hello", 8, 12, "5", "foo")) // returns List<String>
 }

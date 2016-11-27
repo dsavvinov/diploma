@@ -1,3 +1,4 @@
+import java.io.OutputStreamWriter
 import java.io.Reader
 import java.io.Writer
 import java.util.*
@@ -32,28 +33,24 @@ fun dispatch(obj: Any?) {
 
 // ============= Streams =============
 fun filterType(c : Collection<Any>) {
-    c.filter { it is String }           // leave only strings
-            .map { it.length() }     // still, here compiler fails to infer that any element here is String
+    c.filter { it is String }
+            // unresolved reference: length
+            .map { it.length() }
 }
 
 fun filterTypeWorkaround(c : Collection<Any>) {
-    c.filterIsInstance<String>()    // even separate workaround was introduced. Ugly and not flexible!
+    c.filterIsInstance<String>()
             .map { it.length }
-
-    // We still can't do following, however:
-    c.filter { it is Int || it is Long || it is Short }
-            .map { it + 5 }
 }
 
-fun peekCanSpecifyTypeToo(c : Collection<Any>) {
-    fun functionThatAcceptOnlyStrings(obj: Any) {
+fun peekHints(c : Collection<Any>) {
+    fun foo(obj: Any) {
         if (obj !is String) {
             throw RuntimeException()
         }
         // ... some computation ...
     }
-    c.peek { functionThatAcceptOnlyStrings(it) }.map { it.length() }
-    /* Here we want to know function **contract**: it returns successfully iff arg is String */
+    c.peek { foo(it) }.map { it.length() }
 }
 // Summary: we want to know about effects that function produce
 
@@ -67,25 +64,26 @@ fun initInLambda() {
     run {
         x = 2
     }
-
-    x // can't be used here.
-    /* Compiler fails to infer that run-lambda is unconditionally invoked! */
+    x // Variable 'x' must be initialized
 }
 
 // Why do we even care about so ivory-esque example? Sane people won't wrap assignments in lambda!
 // Well, the point is that a lot of constructs we are accustomed to are imlpemented using lambdas in Kotlin
 // Consider:
 
-fun useIdiom(r : Reader?) {
-    var i : Int
-
-    r?.use {
-        i = r.read()    // Nope, no initialization for you!
+fun useIdiom(r : Reader) {
+    val i : Int
+    OutputStreamWriter(r.getOutputSteam).use {
+        // Captured values initialization is forbidden due to
+        // possible reassignment
+        i = it.read()
     }
-
     print(i)
 }
 
+class Bar {
+    var x : Int
+}
 fun initInLambda2() {
     val someMonitor: Any = Unit
     val x: Int
@@ -108,13 +106,9 @@ fun indexOfMax(a: IntArray): Int? {
     var maxI: Int? = null
     a.forEachIndexed { i, value ->
         if (maxI == null || value >= a[maxI]) {
-            /* Confusing compiler message:
-                > Smartcast to 'Int' is impossible, because 'maxI' is a local variable that is captured by a changing closure
-               In fact, it's about capturing 'var' - even if it's checked by null, it could be changed back to null by
-               another lambda.
-               However, that's **not** the case here -- it's not captured by **any** other lambda, and we're perfectly sure
-               that it's safe to smartcast it.
-             */
+            // Smartcast to 'Int' is impossible, because 'maxI'
+            // is a local variable that is captured by a
+            // changing closure.
             maxI = i
         }
     }
@@ -137,6 +131,8 @@ fun trivialUseCase() {
 // we could smartcast here if we would explicitly know that `first` is pure function
 fun f(pair: Pair<*, *>) {
     if (pair.first !is String) return
+    // Smart cast to 'String' is impossible, because 'pair.first'
+    // is a public API property declared in different module
     pair.first.length()
 }
 
