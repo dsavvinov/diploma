@@ -12,7 +12,7 @@
 ## Plugin-specific files:
 
 # IntelliJ
-/out/
+out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -27,7 +27,7 @@ crashlytics-build.properties
 fabric.properties
 
 .gradle
-/build/
+build/
 
 # Ignore Gradle GUI config
 gradle-app.setting

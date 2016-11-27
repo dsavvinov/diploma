@@ -1,13 +1,6 @@
 package system
 
-import tests.*
-
-/**
- * Created by dsavvinov on 25.11.16.
- */
-
-
-class EffectSchema : Expression() {
+class EffectSchemaBuilder {
     val assertions: MutableList<Assertion> = mutableListOf()
     val bindVars: MutableMap<Variable, Expression> = mutableMapOf()
     val args: MutableSet<Variable> = mutableSetOf()
@@ -37,33 +30,46 @@ class EffectSchema : Expression() {
         bindVars[bindee] = binder
     }
 
-    override fun bind(context: Map<Variable, Expression>): EffectSchema {
-        for ((bindee, binder) in context) {
-            bindVar(bindee, binder)
-        }
+    fun build() : EffectSchema {
+        return EffectSchema(assertions, bindVars, args)
+    }
+}
 
-        return this
+class EffectSchema (
+        val assertions: List<Assertion> = listOf(),
+        val bindVars: Map<Variable, Expression> = mapOf(),
+        val args: Set<Variable> = setOf()
+) : Expression() {
+
+    override fun bind(context: Map<Variable, Expression>): EffectSchema {
+        val newMap = mutableMapOf<Variable, Expression>()
+        newMap.putAll(bindVars)
+        newMap.putAll(context)
+        val effectSchema = EffectSchema(assertions, newMap, args)
+        return effectSchema
     }
 
     override fun evaluate(): EffectSchema {
         // bind vars
         assertions.forEach { it.bind(bindVars) }
 
-        val effects: EffectSchema = EffectSchema()
+        val effects: EffectSchemaBuilder = EffectSchemaBuilder()
 
         val freeVars = getFreeVars()
         if (freeVars.isNotEmpty()) {
             throw IllegalArgumentException("Variables $freeVars are not bound; can't evaluate!")
         }
 
-        // Add all assertions
+        // Add all non-false assertions
         for (assertion in assertions) {
-            assertion.evaluate().forEach { effects.addAssertion(it) }
+            assertion.evaluate().forEach {
+                if (it.premise !is Premise.Const || it.premise.const != FALSE) {
+                    effects.addAssertion(it)
+                }
+            }
         }
 
-        // Remove false assertions
-        effects.assertions.removeAll { it.premise is Premise.Const && it.premise.const == FALSE }
-        return effects
+        return effects.build()
     }
 
     fun getFreeVars(): List<Variable> {
@@ -78,5 +84,9 @@ class EffectSchema : Expression() {
 
     fun collectAt(effect: Effect): List<Premise> {
         return assertions.filter { it.effect == effect }.map { it.premise }
+    }
+
+    fun collectExcept(effect: Effect): List<Premise> {
+        return assertions.filter { it.effect != effect }.map { it.premise }
     }
 }

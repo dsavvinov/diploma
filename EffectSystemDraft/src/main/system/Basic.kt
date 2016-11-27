@@ -1,7 +1,7 @@
 package system
 
-import tests.FALSE
-import tests.TRUE
+import system.FALSE
+import system.TRUE
 
 abstract class Expression {
     abstract fun evaluate(): Expression
@@ -20,6 +20,28 @@ open class Variable(val name: String, val value: Value, val type: Type) : Expres
     override fun bind(context: Map<Variable, Expression>): Expression {
         return context[this] ?: this
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as Variable
+
+        if (name != other.name) return false
+        if (value != other.value) return false
+        if (type != other.type) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + value.hashCode()
+        result = 31 * result + type.hashCode()
+        return result
+    }
+
+
 }
 
 class Constant(value: Value, type: Type) : Variable("", value, type) {
@@ -68,7 +90,7 @@ data class Function(val name: String)
 
 data class Application(val function: Function, var args: Map<Variable, Expression>) : Expression() {
     override fun evaluate(): Expression {
-        return Context.getEffectSchema(function).apply { bind(this@Application.args) }.evaluate()
+        return Context.getEffectSchema(function).bind(args).evaluate()
     }
 
     override fun bind(context: Map<Variable, Expression>): Application {

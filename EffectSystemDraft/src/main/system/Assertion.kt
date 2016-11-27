@@ -22,4 +22,5 @@ data class Assertion(val premise: Premise, val effect: Effect) {
     override fun toString(): String {
         return "$premise -> $effect"
     }
+
 }

@@ -1,19 +1,26 @@
 package system
 
-import tests.FALSE
-import tests.NULL_VAL
-import tests.TRUE
-import tests.UNKNOWN
+import system.FALSE
+import system.NULL_VAL
+import system.TRUE
+import system.UNKNOWN
 
-/**
- * Created by dsavvinov on 25.11.16.
- */
 
 sealed class Premise(var lhs: Expression) {
     abstract fun evaluate(): List<Premise>
-    abstract fun bind(context: Map<Variable, Expression>): Premise
 
-    class NotEqual(lhs: Variable, val rhs: Value) : Premise(lhs) {
+    infix fun to(effect: Effect): Assertion {
+        return Assertion(this, effect)
+    }
+
+    open fun bind(context: Map<Variable, Expression>): Premise {
+        lhs = lhs.bind(context)
+        return this
+    }
+
+    abstract fun not(): Premise
+
+    class NotEqual(lhs: Expression, val rhs: Value) : Premise(lhs) {
         override fun evaluate(): List<Premise> {
             lhs = lhs.evaluate()
             val lhs = lhs
@@ -21,8 +28,8 @@ sealed class Premise(var lhs: Expression) {
                 is Variable -> {
                     // Special case for null-literal
                     if (rhs == NULL_VAL) {
-                        if (lhs.type.name.endsWith("?")) {
-                            return listOf(Const(FALSE))
+                        if (!lhs.type.name.endsWith("?")) {
+                            return listOf(Const(TRUE))
                         }
                     }
 
@@ -45,17 +52,16 @@ sealed class Premise(var lhs: Expression) {
             throw IllegalArgumentException("Unknown lhs $lhs")
         }
 
-        override fun bind(context: Map<Variable, Expression>): Premise {
-            lhs = lhs.bind(context)
-            return this
-        }
-
         override fun toString(): String {
             return "$lhs != $rhs"
         }
+
+        override fun not(): Premise {
+            return Equal(lhs, rhs)
+        }
     }
 
-    class Equal(lhs: Variable, val rhs: Value) : Premise(lhs) {
+    class Equal(lhs: Expression, val rhs: Value) : Premise(lhs) {
         override fun evaluate(): List<Premise> {
             lhs = lhs.evaluate()
             val lhs = lhs
@@ -87,42 +93,70 @@ sealed class Premise(var lhs: Expression) {
             throw IllegalArgumentException("Unknown lhs $lhs")
         }
 
-        override fun bind(context: Map<Variable, Expression>): Premise {
-            lhs = lhs.bind(context)
-            return this
-        }
-
         override fun toString(): String {
             return "$lhs == $rhs"
         }
+
+        override fun not(): Premise {
+            return NotEqual(lhs, rhs)
+        }
     }
 
-    class Is(lhs: Variable, val rhs: Type) : Premise(lhs) {
+    class Is(lhs: Expression, val rhs: Type) : Premise(lhs) {
         override fun evaluate(): List<Premise> {
             lhs = lhs.evaluate()
             val lhs = lhs
             when (lhs) {
-                is Variable ->
+                is Variable -> {
+                    // Any? is like UNKNOWN for values, i.e. we can't advance evaluation here
+                    if (lhs.type == ANY_NULL)
+                        return listOf(this)
+
                     if (lhs.type == rhs) {
                         return listOf(Const(TRUE))
                     } else {
                         return listOf(Const(FALSE))
                     }
+                }
             }
             throw IllegalArgumentException("Unknown lhs $lhs")
         }
 
-        override fun bind(context: Map<Variable, Expression>): Premise {
-            lhs = lhs.bind(context)
-            return this
+        override fun toString(): String {
+            return "$lhs is $rhs"
+        }
+
+        override fun not(): Premise {
+            return NotIs(lhs, rhs)
+        }
+    }
+
+    class NotIs(lhs: Expression, val rhs: Type) : Premise(lhs) {
+        override fun evaluate(): List<Premise> {
+            lhs = lhs.evaluate()
+            val lhs = lhs
+            when (lhs) {
+                is Variable -> {
+                    // Any? is like UNKNOWN for values, i.e. we can't advance evaluation here
+                    if (lhs.type == ANY_NULL)
+                        return listOf(this)
+
+                    if (lhs.type != rhs) {
+                        return listOf(Const(TRUE))
+                    } else {
+                        return listOf(Const(FALSE))
+                    }
+                }
+            }
+            throw IllegalArgumentException("Unknown lhs $lhs")
         }
 
         override fun toString(): String {
-            return "$lhs is $rhs)"
+            return "$lhs not is $rhs"
         }
 
-        override fun negationToString(): String {
-            return "$lhs is not $rhs"
+        override fun not(): Premise {
+            return Is(lhs, rhs)
         }
     }
 
@@ -135,42 +169,12 @@ sealed class Premise(var lhs: Expression) {
             return this
         }
 
-        override fun negationToString(): String {
-            return const.negate().toString()
-        }
-
         override fun toString(): String {
             return const.toString()
         }
-    }
 
-    class Not(val premise: Premise) : Premise(premise.lhs) {
-        override fun evaluate(): List<Premise> {
-            val evaluated = premise.evaluate()
-            return evaluated.map {
-                if (it is Const) {
-                    Const(it.const.negate())
-                } else {
-                    Not(it)
-                }
-            }
+        override fun not(): Premise {
+            return Const(const.negate())
         }
-
-        override fun bind(context: Map<Variable, Expression>): Premise {
-            premise.bind(context)
-            return this
-        }
-
-        override fun negationToString(): String {
-            return premise.toString()
-        }
-
-        override fun toString(): String {
-            return premise.negationToString()
-        }
-    }
-
-    fun not() : Premise {
-        return Not(this)
     }
 }
