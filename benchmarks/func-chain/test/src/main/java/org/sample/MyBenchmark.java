@@ -40,19 +40,21 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Thread)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 public class MyBenchmark {
-    private List<String> arg;
+    private List<Integer> arg;
 
     @Setup(Level.Trial)
     public void prepare() {
-        ArrayList<String> larg = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
-            larg.add(Integer.toBinaryString(i));
+        Random rng = new Random(42);
+        ArrayList<Integer> larg = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            larg.add(rng.nextInt());
         }
         arg = larg;
     }
@@ -73,9 +75,30 @@ public class MyBenchmark {
     }
 
     @Benchmark
+    public int javaOneLambda() {
+        return (int) arg.stream()
+                .filter(it -> {
+                    if (it < 0) {
+                        int x1 = it - (it / 2);
+                        return (((x1 * x1) + 42) / 2) % 2 == 0;
+                    } else {
+                        int x1 = it - (it / 4);
+                        return (((x1 * x1) + 42) / 2) % 2 == 0;
+                    }
+                })
+                .count();
+    }
+
+    @Benchmark
     public int javaStream() {
         return (int) arg.stream()
-                .map(String::length)
+                .map(it -> {
+                    if (it < 0) {
+                        return it - (it / 2);
+                    } else {
+                        return it - (it / 4);
+                    }
+                })
                 .map(it -> it * it)
                 .map(it -> it + 42)
                 .map(it -> it / 2)
@@ -86,9 +109,10 @@ public class MyBenchmark {
     @Benchmark
     public int javaFused() {
         int res = 0;
-        for (String s : arg) {
-            int length = s.length();
-            if ( (length * length + 42) / 2 % 2 == 0) {
+        for (Integer s : arg) {
+            int raw = s;
+            int tmp = raw < 0 ? raw - (raw / 2) : raw - (raw / 4);
+            if ( (tmp * tmp + 42) / 2 % 2 == 0) {
                 res += 1;
             }
         }
@@ -98,7 +122,13 @@ public class MyBenchmark {
     @Benchmark
     public int javaUnboxedStream() {
         return (int) arg.stream()
-                .mapToInt(String::length)
+                .mapToInt(it -> {
+                    if (it < 0) {
+                        return it - (it / 2);
+                    } else {
+                        return it - (it / 4);
+                    }
+                })
                 .map(it -> it * it)
                 .map(it -> it + 42)
                 .map(it -> it / 2)
@@ -109,8 +139,8 @@ public class MyBenchmark {
     @Benchmark
     public int naiveBaselineJava() {
         ArrayList<Integer> l1 = new ArrayList<>(arg.size());
-        for (String s : arg) {
-            l1.add(s.length());
+        for (Integer s : arg) {
+            l1.add(s < 0 ? s - (s / 2) : s - (s / 4));
         }
 
         ArrayList<Integer> l2 = new ArrayList<>(l1.size());
@@ -142,7 +172,7 @@ public class MyBenchmark {
     public int unboxedStaticInlinedJava() {
         int[] l1 = new int[arg.size()];
         for (int i = 0; i < arg.size(); i++) {
-            l1[i] = arg.get(i).length();
+            l1[i] = arg.get(i) < 0 ? arg.get(i) - (arg.get(i) / 2) : arg.get(i) - (arg.get(i) / 4);
         }
 
         int[] l2 = new int[l1.length];
@@ -176,7 +206,7 @@ public class MyBenchmark {
     public int boxedStaticInlinedJava() {
         Integer[] l1 = new Integer[arg.size()];
         for (int i = 0; i < arg.size(); i++) {
-            l1[i] = arg.get(i).length();
+            l1[i] = arg.get(i);
         }
 
         Integer[] l2 = new Integer[l1.length];
@@ -212,7 +242,7 @@ public class MyBenchmark {
                 .warmupIterations(20)
                 .measurementIterations(10)
                 .forks(1)
-                .jvmArgs("-Xmx8m")
+                .jvmArgs("-Xmx16m")
                 .build();
 
         new Runner(opt).run();

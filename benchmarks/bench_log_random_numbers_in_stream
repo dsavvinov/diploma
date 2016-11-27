@@ -1,0 +1,37 @@
+Default heap size, 10k elems.
+Benchmark                             Mode  Cnt    Score    Error  Units
+MyBenchmark.boxedStaticInlinedJava    avgt   10  264.071 ± 31.799  us/op
+MyBenchmark.javaFused                 avgt   10  106.114 ±  3.659  us/op
+MyBenchmark.javaStream                avgt   10  466.427 ± 41.210  us/op
+MyBenchmark.javaUnboxedStream         avgt   10  298.046 ±  7.143  us/op
+MyBenchmark.kotlinChain               avgt   10  569.828 ± 35.619  us/op
+MyBenchmark.kotlinFused               avgt   10  121.158 ±  5.690  us/op
+MyBenchmark.kotlinStream              avgt   10  559.133 ± 28.109  us/op
+MyBenchmark.naiveBaselineJava         avgt   10  609.809 ± 58.270  us/op
+MyBenchmark.unboxedStaticInlinedJava  avgt   10  154.231 ± 11.849  us/op
+
+
+Default heap size 100k elems.
+Benchmark                             Mode  Cnt     Score     Error  Units
+MyBenchmark.boxedStaticInlinedJava    avgt   10  2756.293 ± 108.503  us/op
+MyBenchmark.javaFused                 avgt   10  1263.516 ±  11.653  us/op
+MyBenchmark.javaStream                avgt   10  4964.313 ± 532.136  us/op
+MyBenchmark.javaUnboxedStream         avgt   10  2907.814 ± 204.888  us/op
+MyBenchmark.kotlinChain               avgt   10  5135.467 ± 146.445  us/op
+MyBenchmark.kotlinFused               avgt   10  1250.019 ±   9.561  us/op
+MyBenchmark.kotlinStream              avgt   10  5312.551 ± 239.794  us/op
+MyBenchmark.naiveBaselineJava         avgt   10  5278.351 ± 230.018  us/op
+MyBenchmark.unboxedStaticInlinedJava  avgt   10  2044.892 ± 194.803  us/op
+
+
+16M Heap Size 10k elems
+Benchmark                             Mode  Cnt    Score     Error  Units
+MyBenchmark.boxedStaticInlinedJava    avgt   10  457.834 ±  48.046  us/op
+MyBenchmark.javaFused                 avgt   10  113.528 ±   2.202  us/op
+MyBenchmark.javaStream                avgt   10  700.449 ± 119.091  us/op
+MyBenchmark.javaUnboxedStream         avgt   10  279.499 ±  11.057  us/op
+MyBenchmark.kotlinChain               avgt   10  819.852 ±  30.474  us/op
+MyBenchmark.kotlinFused               avgt   10  117.514 ±   0.325  us/op
+MyBenchmark.kotlinStream              avgt   10  942.368 ± 211.132  us/op
+MyBenchmark.naiveBaselineJava         avgt   10  860.935 ±  30.172  us/op
+MyBenchmark.unboxedStaticInlinedJava  avgt   10  256.211 ±  55.983  us/op
