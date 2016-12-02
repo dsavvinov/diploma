@@ -1,23 +1,24 @@
-package system
+package main.system
 
-import system.FALSE
-import system.TRUE
+import main.system.Premise.*
+import main.system.Effect.*
 
-abstract class Expression {
-    abstract fun evaluate(): Expression
-    abstract fun bind(context: Map<Variable, Expression>): Expression
+interface Expression {
+    fun evaluate(context: Map<Variable, EffectSchema>): Expression
 }
 
-open class Variable(val name: String, val value: Value, val type: Type) : Expression() {
+class Variable(val name: String, val value: Value, val type: Type)
+    : EffectSchema(
+        assertions = listOf(Const(TRUE) to Returns(value)),
+        bindVars = mapOf(),
+        args = setOf(),
+        returnVar = null
+) {
     override fun toString(): String {
         return name
     }
 
-    override fun evaluate(): Expression {
-        return this
-    }
-
-    override fun bind(context: Map<Variable, Expression>): Expression {
+    override fun evaluate(context: Map<Variable, EffectSchema>): EffectSchema {
         return context[this] ?: this
     }
 
@@ -44,7 +45,17 @@ open class Variable(val name: String, val value: Value, val type: Type) : Expres
 
 }
 
-class Constant(value: Value, type: Type) : Variable("", value, type) {
+class Constant(val value: Value, val type: Type)
+    : EffectSchema(
+        assertions = listOf(Const(TRUE) to Returns(value)),
+        bindVars = mapOf<Variable, EffectSchema>(),
+        args = setOf<Variable>(),
+        returnVar = null
+) {
+    override fun evaluate(context: Map<Variable, EffectSchema>): Constant {
+        return this
+    }
+
     override fun toString(): String {
         return value.value.toString()
     }
@@ -83,27 +94,16 @@ class Type(val name: String) {
         return name
     }
 
-
+    fun isSubtypeOf(other: Type): Boolean {
+        return this == other
+    }
 }
 
 data class Function(val name: String)
 
-data class Application(val function: Function, var args: Map<Variable, Expression>) : Expression() {
-    override fun evaluate(): Expression {
-        return Context.getEffectSchema(function).bind(args).evaluate()
-    }
-
-    override fun bind(context: Map<Variable, Expression>): Application {
-        val newMap: MutableMap<Variable, Expression> = mutableMapOf()
-        newMap.putAll(args)
-
-        for ((variable, expression) in context) {
-            newMap[variable] = expression
-        }
-
-        args = newMap
-
-        return this
+data class Application(val function: Function, var args: Map<Variable, EffectSchema>) {
+    fun evaluate(): EffectSchema {
+        return Context.getEffectSchema(function).evaluate(args)
     }
 }
 

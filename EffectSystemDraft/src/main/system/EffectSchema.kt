@@ -1,9 +1,10 @@
-package system
+package main.system
 
 class EffectSchemaBuilder {
     val assertions: MutableList<Assertion> = mutableListOf()
     val bindVars: MutableMap<Variable, Expression> = mutableMapOf()
     val args: MutableSet<Variable> = mutableSetOf()
+    var returnVar: Variable? = null
 
     fun addVar(identifier: Variable) {
         if (identifier in args) {
@@ -31,28 +32,18 @@ class EffectSchemaBuilder {
     }
 
     fun build() : EffectSchema {
-        return EffectSchema(assertions, bindVars, args)
+        return EffectSchema(assertions, bindVars, args, returnVar!!)
     }
 }
 
-class EffectSchema (
+open class EffectSchema (
         val assertions: List<Assertion> = listOf(),
         val bindVars: Map<Variable, Expression> = mapOf(),
-        val args: Set<Variable> = setOf()
-) : Expression() {
+        val args: Set<Variable> = setOf(),
+        val returnVar: Variable? = null
+) : Expression, LValue {
 
-    override fun bind(context: Map<Variable, Expression>): EffectSchema {
-        val newMap = mutableMapOf<Variable, Expression>()
-        newMap.putAll(bindVars)
-        newMap.putAll(context)
-        val effectSchema = EffectSchema(assertions, newMap, args)
-        return effectSchema
-    }
-
-    override fun evaluate(): EffectSchema {
-        // bind vars
-        assertions.forEach { it.bind(bindVars) }
-
+    override fun evaluate(context: Map<Variable, EffectSchema>): EffectSchema {
         val effects: EffectSchemaBuilder = EffectSchemaBuilder()
 
         val freeVars = getFreeVars()
@@ -62,8 +53,8 @@ class EffectSchema (
 
         // Add all non-false assertions
         for (assertion in assertions) {
-            assertion.evaluate().forEach {
-                if (it.premise !is Premise.Const || it.premise.const != FALSE) {
+            assertion.evaluate(context).forEach {
+                if (it.premise !is Premise.Const || (it.premise as Premise.Const).const != FALSE) {
                     effects.addAssertion(it)
                 }
             }
@@ -82,11 +73,29 @@ class EffectSchema (
         }.toString()
     }
 
-    fun collectAt(effect: Effect): List<Premise> {
-        return assertions.filter { it.effect == effect }.map { it.premise }
+    fun collectAt(predicate: (Effect) -> Boolean): List<Premise> {
+        return assertions.filter { predicate(it.effect) }.map { it.premise }
     }
 
-    fun collectExcept(effect: Effect): List<Premise> {
-        return assertions.filter { it.effect != effect }.map { it.premise }
+    override fun equalTo(other: LValue) : LValue {
+        val res = EffectSchemaBuilder()
+
+        for ((thisPremise, thisEffect) in assertions) {
+            if (thisEffect !is Effect.Returns) {
+                continue
+            }
+            for ((otherPremise, otherEffect) in other.assertions) {
+                if (otherEffect !is Effect.Returns) {
+                    continue
+                }
+                if (thisPremise.implies(otherPremise)) {
+                    res.addAssertion(otherPremise to Effect.Returns(
+                            if (thisEffect == otherEffect) TRUE_VAL else FALSE_VAL)
+                    )
+                }
+            }
+        }
+
+        return res.build()
     }
 }

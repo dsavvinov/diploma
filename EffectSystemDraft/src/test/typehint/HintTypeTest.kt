@@ -3,10 +3,10 @@ package test.typehint
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import system.*
-import system.Effect.*
-import system.Function
-import system.Premise.*
+import main.system.*
+import main.system.Effect.*
+import main.system.Function
+import main.system.Premise.*
 
 class HintTypeTest {
     val onlyStringArg = Variable("x", UNKNOWN, ANY_NULL)

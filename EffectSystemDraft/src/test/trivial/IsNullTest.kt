@@ -3,11 +3,11 @@ package test.trivial
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import system.*
-import system.Effect.Returns
-import system.Effect.Throws
-import system.Function
-import system.Premise.*
+import main.system.*
+import main.system.Effect.Returns
+import main.system.Effect.Throws
+import main.system.Function
+import main.system.Premise.*
 
 class IsNullTest {
     val isNullArg: Variable = Variable("x", UNKNOWN, ANY_NULL)
@@ -18,8 +18,8 @@ class IsNullTest {
     fun prepare() {
         val isNullES: EffectSchema = EffectSchemaBuilder().apply {
             addVar(isNullArg)
-            addAssertion(Equal(isNullArg, NULL_VAL), Returns(TRUE_VAL))
-            addAssertion(NotEqual(isNullArg, NULL_VAL), Returns(FALSE_VAL))
+            addAssertion(Equal(isNullArg, NULL), Returns(TRUE_VAL))
+            addAssertion(NotEqual(isNullArg, NULL), Returns(FALSE_VAL))
         }.build()
         Context.addEffectSchema(isNull, isNullES)
     }
@@ -53,9 +53,9 @@ class IsNullTest {
         ))).assertions
 
         assertEquals(2, effects.size)
-        assertEquals( (Equal(zAnyNull, NULL_VAL) to Returns(TRUE_VAL)).toString(),
+        assertEquals( (Equal(zAnyNull, NULL) to Returns(TRUE_VAL)).toString(),
                 effects[0].toString())
-        assertEquals( (NotEqual(zAnyNull, NULL_VAL) to Returns(FALSE_VAL)).toString(),
+        assertEquals( (NotEqual(zAnyNull, NULL) to Returns(FALSE_VAL)).toString(),
                 effects[1].toString())
     }
 }

@@ -3,11 +3,11 @@ package test.trivial
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import system.*
-import system.Effect.Returns
-import system.Effect.Throws
-import system.Function
-import system.Premise.*
+import main.system.*
+import main.system.Effect.Returns
+import main.system.Effect.Throws
+import main.system.Function
+import main.system.Premise.*
 
 class AssertTest {
     val assert = Function("assert")
@@ -24,8 +24,8 @@ class AssertTest {
         val assertES = EffectSchemaBuilder().apply {
             addVar(assertArg)
 
-            addAssertion(Equal(assertArg, FALSE_VAL), Throws(ASSERTION_EXCEPTION))
-            addAssertion(Equal(assertArg, FALSE_VAL).not(), Returns(UNIT_VAL))
+            addAssertion(Equal(assertArg, FALSE), Throws(ASSERTION_EXCEPTION))
+            addAssertion(Equal(assertArg, FALSE).not(), Returns(UNIT_VAL))
 
         }.build()
 
@@ -66,11 +66,11 @@ class AssertTest {
 
         assertEquals(2, effects.size)
         assertEquals(
-                (Equal(zAnyNull, FALSE_VAL) to Throws(ASSERTION_EXCEPTION)).toString(),
+                (Equal(zAnyNull, FALSE) to Throws(ASSERTION_EXCEPTION)).toString(),
                 effects[0].toString()
         )
         assertEquals(
-                (NotEqual(zAnyNull, FALSE_VAL) to Returns(UNIT_VAL)).toString(),
+                (NotEqual(zAnyNull, FALSE) to Returns(UNIT_VAL)).toString(),
                 effects[1].toString()
         )
     }

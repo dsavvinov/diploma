@@ -1,4 +1,4 @@
-package system
+package main.system
 
 /**
  * Constants for testing purposes. Normally, those should replaced by usual

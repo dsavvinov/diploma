@@ -1,22 +1,12 @@
-package system
+package main.system
 
-/**
- * Created by dsavvinov on 25.11.16.
- */
-
-data class Assertion(val premise: Premise, val effect: Effect) {
-    fun evaluate(): List<Assertion> {
+data class Assertion(var premise: Premise, var effect: Effect) {
+    fun evaluate(context: Map<Variable, EffectSchema>): List<Assertion> {
         /** Sometimes, when evaluating complex premises, they can raise a bunch of new premises.
          *  Then we just raise a bunch of new assertions.
          */
-        return premise.evaluate().map { Assertion(it, effect) }
-    }
-
-    fun bind(context: Map<Variable, Expression>): Assertion {
-        premise.bind(context)
-        effect.bind(context)
-
-        return this
+        effect = effect.evaluate(context)
+        return premise.evaluate(context).map { Assertion(it, effect) }
     }
 
     override fun toString(): String {
