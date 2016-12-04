@@ -2,7 +2,7 @@ package main.structure
 
 import main.util.BooleanType
 
-class Exception : Primitive {
+data class Exception(val name: String) : Primitive {
     override fun accept(visitor: Visitor): Exception {
         return visitor.visit(this)
     }
@@ -15,20 +15,51 @@ data class Type(val name: String) : Primitive {
 }
 
 data class Variable(val name: String, val type: Type) : Primitive {
-    override fun accept(visitor: Visitor): Variable {
+    override fun accept(visitor: Visitor): Node {
         return visitor.visit(this)
     }
 }
 
-data class Function(val arguments: List<Variable>, val returnVar: Variable) : Primitive {
+data class Function(val name: String, val arguments: List<Variable>, val returnType: Type) : Primitive {
     override fun accept(visitor: Visitor): Function {
         return visitor.visit(this)
     }
+
+    val returnVar: Variable = Variable("return_$name", returnType)
 }
 
-sealed class Constant(open val value: Any, open val type: Type) : Primitive
+open class Constant(open val value: Any, val type: Type) : Primitive {
+    override fun accept(visitor: Visitor): Node {
+        return visitor.visit(this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other?.javaClass != javaClass) return false
+
+        other as Constant
+
+        if (value != other.value) return false
+        if (type != other.type) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = value.hashCode()
+        result = 31 * result + type.hashCode()
+        return result
+    }
+
+
+}
+
 class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType), LogicStatement {
     override fun accept(visitor: Visitor): BooleanConstant {
         return visitor.visit(this)
+    }
+
+    override fun isImplies(stmt: LogicStatement): Boolean {
+        return stmt is BooleanConstant && value == stmt.value
     }
 }

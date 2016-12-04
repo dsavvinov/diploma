@@ -1,5 +1,6 @@
 package main.api
 
+import main.implementations.visitors.Evaluator
 import main.structure.EffectSchema
 import main.structure.Function
 import main.structure.FunctionCall
@@ -15,10 +16,10 @@ object EffectSystem {
         return schemas[function]!!
     }
 
-    // TODO: think about return value
-    fun inferEffects(call: FunctionCall): Any {
-        call.evaluate()
-        return TODO()
+    fun inferEffects(call: FunctionCall): EffectSchema {
+        val evaluator = Evaluator(mutableMapOf())
+        val result = evaluator.visit(call)
+        return result
     }
 }
 

@@ -1,17 +1,17 @@
 package main.implementations.visitors
 
 import main.api.EffectSystem
-import main.implementations.ContextMapImpl
 import main.implementations.EffectImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.*
 import main.structure.Function
+import main.util.foldWith
 import main.util.lift
 
 class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
     val substitutions = mutableMapOf<Variable, Node>()
 
-    override fun visit(call: FunctionCall): Node{
+    override fun visit(call: FunctionCall): EffectSchema {
         val effectSchema = EffectSystem.getEffectSchema(call.function)
         for ((variable, expr) in call.function.arguments.zip(call.args)) {
             substitutions[variable] = expr
@@ -25,7 +25,7 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         for (effect in schema.effects) {
             evaluatedEffects += effect.accept(this)
         }
-        return EffectSchemaImpl(evaluatedEffects)
+        return EffectSchemaImpl(schema.function, evaluatedEffects)
     }
 
     override fun visit(effect: Effect): Effect {
@@ -35,16 +35,14 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         return EffectImpl(evaluatedPremise, evaluatedConclusion)
     }
 
-    override fun visit(isOperator: Is): Node {
+    override fun visit(isOperator: Is): LogicStatement {
         val evaluatedLhs = isOperator.left.accept(this)
         val evaluatedRhs = isOperator.right.accept(this)
 
-        // TODO: think about more elegant implementation
+        // TODO: think about more elegant and readable implementation
         when(evaluatedLhs) {
-            is Variable -> return (evaluatedLhs.type == evaluatedRhs).lift()
-            is Constant -> return (evaluatedLhs.type == evaluatedRhs).lift()
             is EffectSchema -> {
-                // collect all premises that lead to conclusion, in which `returnArg is evaluatedRhs` derivable
+                // collect all premises that lead to conclusion, in which `returnVar is evaluatedRhs` derivable
                 val returnVar = evaluatedLhs.function.returnVar
                 val desiredEffect = Is(returnVar, evaluatedRhs)
 
@@ -56,71 +54,107 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
                     return false.lift()
                 }
 
-                // Join all premises with OR-operator (note right fold - we want first premise be at top)
-                return premises.foldRight(null as LogicStatement?, { node: LogicStatement, acc: Node? ->
-                    if (acc == null) return@foldRight node
-                    return@foldRight Or(node, acc as LogicStatement)
-                })!!
+                // Join all premises with OR-operator
+                return premises.foldWith(::Or)
             }
-            else -> throw IllegalArgumentException("Unknown type for LHS in `Is`-operator: $evaluatedLhs")
+            else -> return Is(evaluatedLhs, evaluatedRhs)
         }
     }
 
-    override fun visit(equalOperator: Equal) {
+    override fun visit(equalOperator: Equal): LogicStatement {
         val evaluatedLhs = equalOperator.left.accept(this)
         val evaluatedRhs = equalOperator.right.accept(this)
+
+        // TODO: refactor this!!!
+        if (evaluatedLhs is EffectSchema) {
+            when (evaluatedRhs) {
+                is Constant -> return evaluatedRhs.equal(evaluatedLhs).foldWith(::Or)
+                is Variable -> return evaluatedRhs.equal(evaluatedLhs).foldWith(::Or)
+                is EffectSchema -> return evaluatedRhs.equal(evaluatedLhs).foldWith(::Or)
+            }
+        }
+
+        if (evaluatedRhs is EffectSchema) {
+            when (evaluatedLhs) {
+                is Constant -> return evaluatedLhs.equal(evaluatedRhs).foldWith(::Or)
+                is Variable -> return evaluatedLhs.equal(evaluatedRhs).foldWith(::Or)
+                is EffectSchema -> return evaluatedLhs.equal(evaluatedRhs).foldWith(::Or)
+            }
+        }
+
+        return Equal(evaluatedLhs, evaluatedRhs)
     }
 
-    override fun visit(throwsOperator: Throws) {
-        TODO("not implemented")
+    override fun visit(throwsOperator: Throws): Throws {
+        return throwsOperator
     }
 
-    override fun visit(or: Or) {
-        TODO("not implemented")
+    override fun visit(or: Or): Or {
+        val left = or.left.accept(this)
+        val right = or.right.accept(this)
+
+        return Or(left, right)
     }
 
-    override fun visit(and: And) {
-        TODO("not implemented")
+    override fun visit(and: And): And {
+        val left =  and.left.accept(this)
+        val right = and.right.accept(this)
+
+        return And(left, right)
     }
 
-    override fun visit(not: Not) {
-        TODO("not implemented")
+    override fun visit(not: Not): Not {
+        val arg = not.arg.accept(this)
+        return Not(arg)
     }
 
-    override fun visit(exception: Exception) {
-        TODO("not implemented")
+    override fun visit(variable: Variable): Node {
+        val node = substitutions[variable]
+        node ?: return variable
+        return node.accept(this)
     }
 
-    override fun visit(type: Type) {
-        TODO("not implemented")
+    override fun visit(booleanConstant: BooleanConstant): BooleanConstant {
+        return booleanConstant
     }
 
-    override fun visit(variable: Variable) {
-        TODO("not implemented")
+    override fun visit(exception: Exception): Exception {
+        return exception
     }
 
-    override fun visit(function: Function) {
-        TODO("not implemented")
+    override fun visit(type: Type): Type {
+        return type
     }
 
-    override fun visit(booleanConstant: BooleanConstant) {
-        TODO("not implemented")
+    override fun visit(function: Function): Function {
+        return function
     }
 
-
-    fun (Variable).equal(right: Variable): BooleanConstant {
-        return (
-                context[this]  != null &&
-                context[right] != null &&
-                context[this]  == context[right]
-                ).lift()
+    override fun visit(constant: Constant): Constant {
+        return constant
     }
 
-    fun (Variable).equal(right: Constant): BooleanConstant {
-        return (context[this] != null && context[this] == right).lift()
+    fun (Variable).equal(effectSchema: EffectSchema): List<LogicStatement> {
+        return effectSchema.effects.map {
+            And(it.premise, Equal(effectSchema.function.returnVar, this))
+        }
     }
 
-    fun (Variable).equal(right: EffectSchema): Boolean {
-        return (context[])
+    fun (Constant).equal(effectSchema: EffectSchema): List<LogicStatement> {
+        return effectSchema.effects.map {
+                And(it.premise, Equal(effectSchema.function.returnVar, this))
+        }
+    }
+
+    fun (EffectSchema).equal(effectSchema: EffectSchema): List<LogicStatement> {
+        return effects.flatMap { thisEffect ->
+            effectSchema.effects.map { otherEffect ->
+                    listOf(
+                        thisEffect.premise,
+                        otherEffect.premise,
+                        Equal(function.returnVar, effectSchema.function.returnVar)
+                    ).foldWith(::And)
+            }
+        }
     }
 }

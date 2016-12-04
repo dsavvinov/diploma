@@ -1,7 +1,14 @@
 package main.structure
 
+import main.implementations.visitors.Printer
+
 interface Node {
     fun accept(visitor: Visitor): Node
+    fun print(): String {
+        val printer = Printer()
+        accept(printer)
+        return printer.toString()
+    }
 }
 
 // TODO: think if we can (and if we should) be more accurate and express, that
@@ -27,7 +34,7 @@ interface Effect : Node {
 
 // Something, than can be evaluated to TRUE or FALSE
 interface LogicStatement : Node {
-    override fun accept(visitor: Visitor): Node
+    override fun accept(visitor: Visitor): LogicStatement
 
     fun isImplies(stmt: LogicStatement): Boolean
 }
