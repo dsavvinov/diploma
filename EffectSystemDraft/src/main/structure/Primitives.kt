@@ -6,17 +6,29 @@ data class Exception(val name: String) : Primitive {
     override fun accept(visitor: Visitor): Exception {
         return visitor.visit(this)
     }
+
+    override fun isImplies(op: Operator): Boolean {
+        return false
+    }
 }
 
 data class Type(val name: String) : Primitive {
     override fun accept(visitor: Visitor): Type {
         return visitor.visit(this)
     }
+
+    override fun isImplies(op: Operator): Boolean {
+        return false
+    }
 }
 
 data class Variable(val name: String, val type: Type) : Primitive {
     override fun accept(visitor: Visitor): Node {
         return visitor.visit(this)
+    }
+
+    override fun isImplies(op: Operator): Boolean {
+        return false
     }
 }
 
@@ -26,6 +38,10 @@ data class Function(val name: String, val arguments: List<Variable>, val returnT
     }
 
     val returnVar: Variable = Variable("return_$name", returnType)
+
+    override fun isImplies(op: Operator): Boolean {
+        return false
+    }
 }
 
 open class Constant(open val value: Any, val type: Type) : Primitive {
@@ -51,7 +67,9 @@ open class Constant(open val value: Any, val type: Type) : Primitive {
         return result
     }
 
-
+    override fun isImplies(op: Operator): Boolean {
+        return false
+    }
 }
 
 class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType) {
@@ -59,7 +77,7 @@ class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType
         return visitor.visit(this)
     }
 
-//    override fun isImplies(stmt: LogicStatement): Boolean {
-//        return stmt is BooleanConstant && value == stmt.value
-//    }
+    override fun isImplies(op: Operator): Boolean {
+        return false
+    }
 }

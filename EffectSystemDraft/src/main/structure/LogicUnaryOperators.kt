@@ -5,7 +5,7 @@ class Not(override val arg: Node) : UnaryOperator {
         return visitor.visit(this)
     }
 
-//    override fun isImplies(stmt: LogicStatement): Boolean {
-//        return !arg.isImplies(stmt)
-//    }
+    override fun isImplies(op: Operator): Boolean {
+        return !arg.isImplies(op)
+    }
 }

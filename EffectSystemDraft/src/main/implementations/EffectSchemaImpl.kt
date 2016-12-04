@@ -12,4 +12,8 @@ class EffectSchemaImpl(
     override fun accept(visitor: Visitor): EffectSchema {
         return visitor.visit(this)
     }
+
+    override fun isImplies(op: Operator): Boolean {
+        return false
+    }
 }

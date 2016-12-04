@@ -30,16 +30,16 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
     }
 
     override fun visit(effect: Effect): Node {
-        val evaluatedPremise = effect.premise.accept(this) as EffectSchema
+        val evaluatedPremise = effect.premise.accept(this)
         val evaluatedConclusion = effect.conclusion.accept(this)
 
-        val effects = evaluatedPremise.effects.map {
-            EffectImpl(
-                    premise = it.premise,
-                    conclusion = And(it.conclusion, evaluatedConclusion)
-            )
-        }
-        return EffectSchemaImpl(effects)
+//        val effects = evaluatedPremise.effects.map {
+//            EffectImpl(
+//                    premise = it.premise,
+//                    conclusion = And(it.conclusion, evaluatedConclusion)
+//            )
+//        }
+        return EffectSchemaImpl(listOf(EffectImpl(evaluatedPremise, evaluatedConclusion)))
     }
 
     override fun visit(isOperator: Is): Node {
@@ -66,25 +66,23 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         val evaluatedRhs = equalOperator.right.accept(this)
 
         // TODO: refactor this!!!
-        if (evaluatedLhs is EffectSchema) {
-            when (evaluatedRhs) {
-                is Constant -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
-                is Variable -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
-                is EffectSchema -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
-            }
-        }
+//        if (evaluatedLhs is EffectSchema) {
+//            when (evaluatedRhs) {
+//                is Constant -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+//                is Variable -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+//                is EffectSchema -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+//            }
+//        }
+//
+//        if (evaluatedRhs is EffectSchema) {
+//            when (evaluatedLhs) {
+//                is Constant -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+//                is Variable -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+//                is EffectSchema -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+//            }
+//        }
 
-        if (evaluatedRhs is EffectSchema) {
-            when (evaluatedLhs) {
-                is Constant -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
-                is Variable -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
-                is EffectSchema -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
-            }
-        }
-
-        return EffectSchemaImpl(listOf(
-                EffectImpl(Equal(evaluatedLhs, evaluatedRhs), Equal(Variable("return", AnyType), true.lift()))
-        ))
+        return Equal(evaluatedLhs, evaluatedRhs)
     }
 
     override fun visit(throwsOperator: Throws): Throws {
@@ -138,16 +136,12 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
 
     fun (Variable).equal(effectSchema: EffectSchema): List<Effect> {
         val desired = Equal(effectSchema.returnVar, this)
-        return effectSchema.effects.map {
-            EffectImpl(it.premise, And(it.conclusion, Equal(effectSchema.returnVar, this)))
-        }
+        return effectSchema.effects.filter { it.conclusion.isImplies(desired) }
     }
 
     fun (Constant).equal(effectSchema: EffectSchema): List<Effect> {
         val desired = Equal(effectSchema.returnVar, this)
-        return effectSchema.effects.map {
-            EffectImpl(it.premise, And(it.conclusion, Equal(effectSchema.returnVar, this)))
-        }
+        return effectSchema.effects.filter { it.conclusion.isImplies(desired) }
     }
 
     fun (EffectSchema).equal(effectSchema: EffectSchema): List<Effect> {

@@ -7,9 +7,9 @@ class Is(override val left: Node, override val right: Type) : BinaryOperator {
         return visitor.visit(this)
     }
 
-//    override fun isImplies(stmt: LogicStatement): Boolean {
-//        return stmt is Is && left == stmt.left && right.isSubtypeOf(stmt.right)
-//    }
+    override fun isImplies(op: Operator): Boolean {
+        return op is Is && left == op.left && right.isSubtypeOf(op.right)
+    }
 }
 
 class Equal(override val left: Node, override val right: Node) : BinaryOperator {
@@ -17,7 +17,7 @@ class Equal(override val left: Node, override val right: Node) : BinaryOperator 
         return visitor.visit(this)
     }
 
-//    override fun isImplies(stmt: LogicStatement): Boolean {
-//        return stmt is Equal && left == stmt.left && left == stmt.right
-//    }
+    override fun isImplies(op: Operator): Boolean {
+        return op is Equal && left == op.left && left == op.right
+    }
 }

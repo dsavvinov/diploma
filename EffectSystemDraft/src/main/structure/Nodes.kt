@@ -9,6 +9,8 @@ interface Node {
         accept(printer)
         return printer.toString()
     }
+
+    fun isImplies(op: Operator): Boolean
 }
 
 // TODO: think if we can (and if we should) be more accurate and express, that
@@ -31,12 +33,14 @@ interface Effect : Node {
     override fun accept(visitor: Visitor): Node
 }
 
-interface BinaryOperator : Node {
+interface Operator : Node
+
+interface BinaryOperator : Operator {
     val left: Node
     val right: Node
 }
 
-interface UnaryOperator : Node {
+interface UnaryOperator : Operator {
     val arg: Node
 }
 
