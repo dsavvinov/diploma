@@ -9,12 +9,12 @@ class EffectSchemaBuilder(val function: Function) {
     val effects: MutableList<Effect> = mutableListOf()
     val returnVar = function.returnVar
 
-    infix fun (LogicStatement).to(other: LogicStatement): Unit {
+    infix fun (Node).to(other: Node): Unit {
         effects += EffectImpl(this, other)
     }
 
     fun build(): EffectSchema {
-        return EffectSchemaImpl(function, effects)
+        return EffectSchemaImpl(effects, function.returnVar)
     }
 
 }

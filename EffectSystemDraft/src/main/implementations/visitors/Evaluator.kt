@@ -5,7 +5,7 @@ import main.implementations.EffectImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.*
 import main.structure.Function
-import main.util.foldWith
+import main.util.AnyType
 import main.util.lift
 
 class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
@@ -21,21 +21,28 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
     }
 
     override fun visit(schema: EffectSchema): EffectSchema {
-        val evaluatedEffects = mutableListOf<Effect>()
+        val schemas = mutableListOf<EffectSchema>()
         for (effect in schema.effects) {
-            evaluatedEffects += effect.accept(this)
+            schemas += effect.accept(this) as EffectSchema
         }
-        return EffectSchemaImpl(schema.function, evaluatedEffects)
+
+        return EffectSchemaImpl(schemas.flatMap { it.effects }, schema.returnVar)
     }
 
-    override fun visit(effect: Effect): Effect {
-        val evaluatedPremise = effect.premise.accept(this)
+    override fun visit(effect: Effect): Node {
+        val evaluatedPremise = effect.premise.accept(this) as EffectSchema
         val evaluatedConclusion = effect.conclusion.accept(this)
 
-        return EffectImpl(evaluatedPremise, evaluatedConclusion)
+        val effects = evaluatedPremise.effects.map {
+            EffectImpl(
+                    premise = it.premise,
+                    conclusion = And(it.conclusion, evaluatedConclusion)
+            )
+        }
+        return EffectSchemaImpl(effects)
     }
 
-    override fun visit(isOperator: Is): LogicStatement {
+    override fun visit(isOperator: Is): Node {
         val evaluatedLhs = isOperator.left.accept(this)
         val evaluatedRhs = isOperator.right.accept(this)
 
@@ -43,46 +50,41 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         when(evaluatedLhs) {
             is EffectSchema -> {
                 // collect all premises that lead to conclusion, in which `returnVar is evaluatedRhs` derivable
-                val returnVar = evaluatedLhs.function.returnVar
+                val returnVar = evaluatedLhs.returnVar
                 val desiredEffect = Is(returnVar, evaluatedRhs)
 
-                val premises = evaluatedLhs.effects
-                        .filter { it.conclusion.isImplies(desiredEffect) }
-                        .map { it.premise }
-
-                if (premises.isEmpty()) {
-                    return false.lift()
-                }
-
-                // Join all premises with OR-operator
-                return premises.foldWith(::Or)
+                val effects = evaluatedLhs.effects
+                        .map { EffectImpl(it.premise, And(it.conclusion, Is(evaluatedLhs.returnVar, evaluatedRhs)))}
+                return EffectSchemaImpl(effects)
             }
             else -> return Is(evaluatedLhs, evaluatedRhs)
         }
     }
 
-    override fun visit(equalOperator: Equal): LogicStatement {
+    override fun visit(equalOperator: Equal): Node {
         val evaluatedLhs = equalOperator.left.accept(this)
         val evaluatedRhs = equalOperator.right.accept(this)
 
         // TODO: refactor this!!!
         if (evaluatedLhs is EffectSchema) {
             when (evaluatedRhs) {
-                is Constant -> return evaluatedRhs.equal(evaluatedLhs).foldWith(::Or)
-                is Variable -> return evaluatedRhs.equal(evaluatedLhs).foldWith(::Or)
-                is EffectSchema -> return evaluatedRhs.equal(evaluatedLhs).foldWith(::Or)
+                is Constant -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+                is Variable -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+                is EffectSchema -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
             }
         }
 
         if (evaluatedRhs is EffectSchema) {
             when (evaluatedLhs) {
-                is Constant -> return evaluatedLhs.equal(evaluatedRhs).foldWith(::Or)
-                is Variable -> return evaluatedLhs.equal(evaluatedRhs).foldWith(::Or)
-                is EffectSchema -> return evaluatedLhs.equal(evaluatedRhs).foldWith(::Or)
+                is Constant -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+                is Variable -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+                is EffectSchema -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
             }
         }
 
-        return Equal(evaluatedLhs, evaluatedRhs)
+        return EffectSchemaImpl(listOf(
+                EffectImpl(Equal(evaluatedLhs, evaluatedRhs), Equal(Variable("return", AnyType), true.lift()))
+        ))
     }
 
     override fun visit(throwsOperator: Throws): Throws {
@@ -134,27 +136,21 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         return constant
     }
 
-    fun (Variable).equal(effectSchema: EffectSchema): List<LogicStatement> {
+    fun (Variable).equal(effectSchema: EffectSchema): List<Effect> {
+        val desired = Equal(effectSchema.returnVar, this)
         return effectSchema.effects.map {
-            And(it.premise, Equal(effectSchema.function.returnVar, this))
+            EffectImpl(it.premise, And(it.conclusion, Equal(effectSchema.returnVar, this)))
         }
     }
 
-    fun (Constant).equal(effectSchema: EffectSchema): List<LogicStatement> {
+    fun (Constant).equal(effectSchema: EffectSchema): List<Effect> {
+        val desired = Equal(effectSchema.returnVar, this)
         return effectSchema.effects.map {
-                And(it.premise, Equal(effectSchema.function.returnVar, this))
+            EffectImpl(it.premise, And(it.conclusion, Equal(effectSchema.returnVar, this)))
         }
     }
 
-    fun (EffectSchema).equal(effectSchema: EffectSchema): List<LogicStatement> {
-        return effects.flatMap { thisEffect ->
-            effectSchema.effects.map { otherEffect ->
-                    listOf(
-                        thisEffect.premise,
-                        otherEffect.premise,
-                        Equal(function.returnVar, effectSchema.function.returnVar)
-                    ).foldWith(::And)
-            }
-        }
+    fun (EffectSchema).equal(effectSchema: EffectSchema): List<Effect> {
+        TODO()
     }
 }

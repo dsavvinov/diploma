@@ -54,12 +54,12 @@ open class Constant(open val value: Any, val type: Type) : Primitive {
 
 }
 
-class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType), LogicStatement {
+class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType) {
     override fun accept(visitor: Visitor): BooleanConstant {
         return visitor.visit(this)
     }
 
-    override fun isImplies(stmt: LogicStatement): Boolean {
-        return stmt is BooleanConstant && value == stmt.value
-    }
+//    override fun isImplies(stmt: LogicStatement): Boolean {
+//        return stmt is BooleanConstant && value == stmt.value
+//    }
 }

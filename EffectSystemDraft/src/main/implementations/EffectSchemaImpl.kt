@@ -2,8 +2,11 @@ package main.implementations
 
 import main.structure.*
 import main.structure.Function
+import main.util.AnyType
 
-class EffectSchemaImpl(override val function: Function, override var effects: List<Effect>)
+class EffectSchemaImpl(
+        override var effects: List<Effect>,
+        override val returnVar: Variable = Variable("return", AnyType))
     : EffectSchema, Collection<Effect> by effects
 {
     override fun accept(visitor: Visitor): EffectSchema {

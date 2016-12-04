@@ -19,42 +19,25 @@ interface FunctionCall : Node {
 }
 
 interface EffectSchema : Node {
-    val function: Function
+    val returnVar: Variable
     val effects: List<Effect>
     override fun accept(visitor: Visitor): EffectSchema
 }
 
 interface Effect : Node {
-    val premise: LogicStatement
-    val conclusion: LogicStatement
+    val premise: Node
+    val conclusion: Node
 
-    override fun accept(visitor: Visitor): Effect
+    override fun accept(visitor: Visitor): Node
 }
 
-
-// Something, than can be evaluated to TRUE or FALSE
-interface LogicStatement : Node {
-    override fun accept(visitor: Visitor): LogicStatement
-
-    fun isImplies(stmt: LogicStatement): Boolean
-}
-
-interface BinaryOperator : LogicStatement {
+interface BinaryOperator : Node {
     val left: Node
     val right: Node
 }
 
-interface UnaryOperator : LogicStatement {
+interface UnaryOperator : Node {
     val arg: Node
-}
-
-interface LogicBinaryOperator : LogicStatement, BinaryOperator {
-    override val left: LogicStatement
-    override val right: LogicStatement
-}
-
-interface LogicUnaryOperator : LogicStatement, UnaryOperator {
-    override val arg: LogicStatement
 }
 
 // Leafs of our tree-like structure

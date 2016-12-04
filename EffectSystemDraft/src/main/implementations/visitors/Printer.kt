@@ -43,7 +43,7 @@ class Printer : Visitor {
     }
 
     override fun visit(schema: EffectSchema): EffectSchema {
-        sb.append("${indent}Schema for function ${schema.function.name}:")
+        sb.append("${indent}Schema:")
         nested {
             schema.effects.forEach { it.accept(this) }
         }
@@ -61,7 +61,7 @@ class Printer : Visitor {
         return effect
     }
 
-    override fun visit(isOperator: Is): LogicStatement {
+    override fun visit(isOperator: Is): Node {
         isOperator.left.accept(this)
         sb.append(" is ")
         isOperator.right.accept(this)
@@ -69,7 +69,7 @@ class Printer : Visitor {
         return isOperator
     }
 
-    override fun visit(equalOperator: Equal): LogicStatement {
+    override fun visit(equalOperator: Equal): Node {
         equalOperator.left.accept(this)
         sb.append(" == ")
         equalOperator.right.accept(this)
@@ -84,7 +84,7 @@ class Printer : Visitor {
         return throwsOperator
     }
 
-    override fun visit(or: Or): LogicStatement {
+    override fun visit(or: Or): Node {
         inBrackets { or.left.accept(this) }
         sb.append(" OR ")
         inBrackets { or.right.accept(this) }
@@ -92,7 +92,7 @@ class Printer : Visitor {
         return or
     }
 
-    override fun visit(and: And): LogicStatement {
+    override fun visit(and: And): Node {
         inBrackets { and.left.accept(this) }
         sb.append(" AND ")
         inBrackets { and.right.accept(this) }
@@ -100,7 +100,7 @@ class Printer : Visitor {
         return and
     }
 
-    override fun visit(not: Not): LogicStatement {
+    override fun visit(not: Not): Node {
         sb.append("NOT")
         inBrackets { not.arg.accept(this) }
 

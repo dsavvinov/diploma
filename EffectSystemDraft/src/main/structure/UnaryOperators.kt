@@ -5,8 +5,8 @@ class Throws(override val arg: Exception) : UnaryOperator {
         return visitor.visit(this)
     }
 
-    override fun isImplies(stmt: LogicStatement): Boolean {
-        return stmt is Throws && arg == stmt.arg
-    }
+//    override fun isImplies(stmt: LogicStatement): Boolean {
+//        return stmt is Throws && arg == stmt.arg
+//    }
 }
 
