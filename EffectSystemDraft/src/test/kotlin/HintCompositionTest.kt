@@ -9,7 +9,7 @@ import main.util.*
 import org.junit.BeforeClass
 import org.junit.Test
 
-class CompositionTest {
+class HintCompositionTest {
     companion object {
         val x = Variable("x", BooleanType)
         val assertFunction = Function("assert", listOf(x), UnitType)
@@ -20,24 +20,33 @@ class CompositionTest {
 
         val y = Variable("x", AnyNullType)
 
-        val isNull = Function("isNull", listOf(y), BooleanType)
-        val isNullEs = isNull.schema {
-            Equal(y, NULL) to Equal(returnVar, true.lift())
-            Not(Equal(y, NULL)) to Equal(returnVar, false.lift())
+        val isString = Function("isString", listOf(y), BooleanType)
+        val isStringES = isString.schema {
+            Is(y, StringType) to Equal(returnVar, true.lift())
+            Not(Is(y, StringType)) to Equal(returnVar, false.lift())
         }
 
         @BeforeClass
         @JvmStatic
         fun prepare() {
+            EffectSystem.addEffectSchema(isString, isStringES)
             EffectSystem.addEffectSchema(assertFunction, assertES)
-            EffectSystem.addEffectSchema(isNull, isNullEs)
         }
     }
 
     @Test
-    fun shouldThrowForNonNull() {
-        val z = Variable("z", AnyType)
-        val callNode: FunctionCall = assertFunction.invoke(isNull.invoke(z))
+    fun shouldReturnForString() {
+        val s = Variable("s", StringType)
+
+        val callNode = assertFunction.invoke(isString.invoke(s))
+        val effects = EffectSystem.inferEffects(callNode)
+
+        println(effects.print())
+    }
+
+    @Test
+    fun shouldThrowForNonString() {
+        val callNode = assertFunction.invoke(isString.invoke(true.lift()))
         val effects = EffectSystem.inferEffects(callNode)
 
         println(effects.print())

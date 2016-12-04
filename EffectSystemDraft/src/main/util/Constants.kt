@@ -12,4 +12,6 @@ val AnyType = Type("Any")
 val AnyNullType = Type("Any?")
 val NULL = Constant("null", AnyNullType) // a "little" bit inaccurate definition
 
+val StringType = Type("String")
+
 val AssertionFailedException = main.structure.Exception("AssertionFailedException")

@@ -33,12 +33,9 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         val evaluatedPremise = effect.premise.accept(this)
         val evaluatedConclusion = effect.conclusion.accept(this)
 
-//        val effects = evaluatedPremise.effects.map {
-//            EffectImpl(
-//                    premise = it.premise,
-//                    conclusion = And(it.conclusion, evaluatedConclusion)
-//            )
-//        }
+        if (evaluatedPremise is EffectSchema) {
+            return EffectSchemaImpl(evaluatedPremise.effects.map { EffectImpl(it.premise, And(it.conclusion, evaluatedConclusion)) })
+        }
         return EffectSchemaImpl(listOf(EffectImpl(evaluatedPremise, evaluatedConclusion)))
     }
 
@@ -66,21 +63,21 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         val evaluatedRhs = equalOperator.right.accept(this)
 
         // TODO: refactor this!!!
-//        if (evaluatedLhs is EffectSchema) {
-//            when (evaluatedRhs) {
-//                is Constant -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
-//                is Variable -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
-//                is EffectSchema -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
-//            }
-//        }
-//
-//        if (evaluatedRhs is EffectSchema) {
-//            when (evaluatedLhs) {
-//                is Constant -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
-//                is Variable -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
-//                is EffectSchema -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
-//            }
-//        }
+        if (evaluatedLhs is EffectSchema) {
+            when (evaluatedRhs) {
+                is Constant -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+                is Variable -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+                is EffectSchema -> return EffectSchemaImpl(evaluatedRhs.equal(evaluatedLhs))
+            }
+        }
+
+        if (evaluatedRhs is EffectSchema) {
+            when (evaluatedLhs) {
+                is Constant -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+                is Variable -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+                is EffectSchema -> return EffectSchemaImpl(evaluatedLhs.equal(evaluatedRhs))
+            }
+        }
 
         return Equal(evaluatedLhs, evaluatedRhs)
     }

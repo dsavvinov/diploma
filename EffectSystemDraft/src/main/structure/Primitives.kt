@@ -72,7 +72,7 @@ open class Constant(open val value: Any, val type: Type) : Primitive {
     }
 }
 
-class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType) {
+data class BooleanConstant(override val value: Boolean) : Constant(value, BooleanType) {
     override fun accept(visitor: Visitor): BooleanConstant {
         return visitor.visit(this)
     }
