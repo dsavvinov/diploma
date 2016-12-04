@@ -1,8 +1,8 @@
 package main.implementations.visitors
 
 import main.api.EffectSystem
-import main.implementations.EffectImpl
-import main.implementations.EffectSchemaImpl
+import main.implementations.*
+import main.implementations.operators.*
 import main.structure.*
 import main.structure.Function
 import main.util.AnyType
@@ -10,6 +10,7 @@ import main.util.lift
 
 class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
     val substitutions = mutableMapOf<Variable, Node>()
+    var inversed = false
 
     override fun visit(call: FunctionCall): EffectSchema {
         val effectSchema = EffectSystem.getEffectSchema(call.function)
@@ -100,8 +101,14 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         return And(left, right)
     }
 
-    override fun visit(not: Not): Not {
+    // TODO: think about proper application of logic operators to effect schemas
+    override fun visit(not: Not): Node {
+        inversed = inversed.xor(true)
         val arg = not.arg.accept(this)
+
+        if (arg is EffectSchema) {
+            return arg
+        }
         return Not(arg)
     }
 
@@ -133,15 +140,27 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
 
     fun (Variable).equal(effectSchema: EffectSchema): List<Effect> {
         val desired = Equal(effectSchema.returnVar, this)
-        return effectSchema.effects.filter { it.conclusion.isImplies(desired) }
+        return effectSchema.effects.filter { it.conclusion.isImplies(desired).xor(inversed) }
     }
 
     fun (Constant).equal(effectSchema: EffectSchema): List<Effect> {
         val desired = Equal(effectSchema.returnVar, this)
-        return effectSchema.effects.filter { it.conclusion.isImplies(desired) }
+        return effectSchema.effects.filter { it.conclusion.isImplies(desired).xor(inversed) }
     }
 
     fun (EffectSchema).equal(effectSchema: EffectSchema): List<Effect> {
-        TODO()
+        return effects.flatMap { thisEffect ->
+            val thisReturns: Equal? = thisEffect.search { it is Equal && it.left == returnVar }.firstOrNull() as Equal?
+            if (thisReturns != null) {
+                effectSchema.effects
+                        .filter { it.conclusion.isImplies(Equal(effectSchema.returnVar, thisReturns.right)).xor(inversed) }
+                        .map { EffectImpl(
+                                premise = And(thisEffect.premise, it.premise),
+                                conclusion = And(thisEffect.conclusion, it.conclusion)
+                        ) }
+            } else {
+                listOf<Effect>()
+            }
+        }
     }
 }

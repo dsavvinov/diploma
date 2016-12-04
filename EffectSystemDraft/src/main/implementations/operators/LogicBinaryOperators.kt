@@ -1,4 +1,9 @@
-package main.structure
+package main.implementations.operators
+
+import main.structure.BinaryOperator
+import main.structure.Node
+import main.structure.Operator
+import main.structure.Visitor
 
 data class Or(override val left: Node, override val right: Node) : BinaryOperator {
     override fun accept(visitor: Visitor): Node {

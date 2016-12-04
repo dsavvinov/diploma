@@ -3,6 +3,9 @@ package test.kotlin
 import main.api.EffectSystem
 import main.api.dsl.invoke
 import main.api.dsl.schema
+import main.implementations.operators.Equal
+import main.implementations.operators.Not
+import main.implementations.operators.Throws
 import main.structure.*
 import main.structure.Function
 import main.util.*

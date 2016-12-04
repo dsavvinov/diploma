@@ -1,5 +1,8 @@
 package main.structure
 
+import main.implementations.*
+import main.implementations.operators.*
+
 // TODO: think about selective visitor
 interface Visitor {
     fun visit(call: FunctionCall): Node

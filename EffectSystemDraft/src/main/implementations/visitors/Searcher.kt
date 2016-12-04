@@ -5,143 +5,145 @@ import main.implementations.operators.*
 import main.structure.*
 import main.structure.Function
 
-class Printer : Visitor {
-    override fun toString(): String {
-        return sb.toString()
-    }
-
-    private val sb = StringBuilder()
-    private var indent = ""
-    private val indentStep = "  "
-
-    private fun indent() {
-        indent += indentStep
-    }
-
-    private fun outdent() {
-        indent = indent.removeSuffix(indentStep)
-    }
-
-    private fun nested(body: () -> Unit): Unit {
-        sb.appendln("{")
-        indent()
-        body()
-        outdent()
-        sb.appendln("}")
-    }
-
-    private fun inBrackets(body: () -> Unit): Unit {
-        sb.append("(")
-        body()
-        sb.append(")")
-    }
+class Searcher(val predicate: (Node) -> Boolean) : Visitor {
+    val result: MutableList<Node> = mutableListOf()
 
     override fun visit(call: FunctionCall): Node {
-        sb.append("${indent}Call of ${call.function.name} with args:")
-        nested {
-            call.args.forEach { it.accept(this) }
-        }
         return call
     }
 
     override fun visit(schema: EffectSchema): EffectSchema {
-        sb.append("${indent}Schema:")
-        nested {
-            schema.effects.forEach { it.accept(this) }
+        if (predicate(schema)) {
+            result += schema
         }
 
+        schema.effects.forEach { it.accept(this) }
         return schema
     }
 
-    override fun visit(effect: Effect): Effect {
-        sb.append(indent)
-        effect.premise.accept(this)
-        sb.append(" => ")
-        effect.conclusion.accept(this)
-        sb.appendln()
+    override fun visit(effect: Effect): Node {
+        if (predicate(effect)) {
+            result += effect
+        }
 
+        effect.premise.accept(this)
+        effect.conclusion.accept(this)
         return effect
     }
 
     override fun visit(isOperator: Is): Node {
+        if (predicate(isOperator)) {
+            result += isOperator
+        }
+
         isOperator.left.accept(this)
-        sb.append(" is ")
         isOperator.right.accept(this)
 
         return isOperator
     }
 
     override fun visit(equalOperator: Equal): Node {
+        if (predicate(equalOperator)) {
+            result += equalOperator
+        }
+
         equalOperator.left.accept(this)
-        sb.append(" == ")
         equalOperator.right.accept(this)
 
         return equalOperator
     }
 
     override fun visit(throwsOperator: Throws): Throws {
-        sb.append("Throws ")
+        if (predicate(throwsOperator)) {
+            result += throwsOperator
+        }
+
         throwsOperator.arg.accept(this)
 
         return throwsOperator
     }
 
     override fun visit(or: Or): Node {
-        inBrackets { or.left.accept(this) }
-        sb.append(" OR ")
-        inBrackets { or.right.accept(this) }
+        if (predicate(or)) {
+            result += or
+        }
+
+        or.left.accept(this)
+        or.right.accept(this)
 
         return or
     }
 
     override fun visit(and: And): Node {
-        inBrackets { and.left.accept(this) }
-        sb.append(" AND ")
-        inBrackets { and.right.accept(this) }
+        if (predicate(and)) {
+            result += and
+        }
+
+        and.left.accept(this)
+        and.right.accept(this)
 
         return and
     }
 
     override fun visit(not: Not): Node {
-        sb.append("NOT")
-        inBrackets { not.arg.accept(this) }
+        if (predicate(not)) {
+            result += not
+        }
+
+        not.arg.accept(this)
 
         return not
     }
 
     override fun visit(exception: Exception): Exception {
-        sb.append(exception.name)
+        if (predicate(exception)) {
+            result += exception
+        }
 
         return exception
     }
 
     override fun visit(type: Type): Type {
-        sb.append(type.name)
+        if (predicate(type)) {
+            result += type
+        }
 
         return type
     }
 
     override fun visit(variable: Variable): Node {
-        sb.append(variable.name)
+        if (predicate(variable)) {
+            result += variable
+        }
 
         return variable
     }
 
     override fun visit(function: Function): Function {
-        sb.append("Function <${function.name}>")
+        if (predicate(function)) {
+            result += function
+        }
 
         return function
     }
 
     override fun visit(constant: Constant): Constant {
-        sb.append("${constant.value}")
+        if (predicate(constant)) {
+            result += constant
+        }
 
         return constant
     }
 
     override fun visit(booleanConstant: BooleanConstant): BooleanConstant {
-        sb.append("${booleanConstant.value}")
+        if (predicate(booleanConstant)) {
+            result += booleanConstant
+        }
 
         return booleanConstant
     }
+}
+
+fun (Node).search(predicate: (Node) -> Boolean): List<Node> {
+    return Searcher(predicate).apply { this@search.accept(this) }.result
 }
