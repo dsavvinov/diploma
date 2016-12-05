@@ -49,7 +49,7 @@ open class Constant(open val value: Any, val type: Type) : Primitive {
         return visitor.visit(this)
     }
 
-    override fun equals(other: Any?): Boolean {
+    override final fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other?.javaClass != javaClass) return false
 
@@ -61,7 +61,7 @@ open class Constant(open val value: Any, val type: Type) : Primitive {
         return true
     }
 
-    override fun hashCode(): Int {
+    override final fun hashCode(): Int {
         var result = value.hashCode()
         result = 31 * result + type.hashCode()
         return result

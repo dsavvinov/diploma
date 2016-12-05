@@ -1,9 +1,9 @@
 package main.structure
 
-import main.implementations.*
 import main.implementations.operators.*
 
 // TODO: think about selective visitor
+// TODO: returns Data, where Data is generic arg
 interface Visitor {
     fun visit(call: FunctionCall): Node
     fun visit(schema: EffectSchema): EffectSchema

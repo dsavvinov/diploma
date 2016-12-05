@@ -4,12 +4,14 @@ import main.implementations.visitors.Printer
 
 interface Node {
     fun accept(visitor: Visitor): Node
+    // TODO: refactor in extension function
     fun print(): String {
         val printer = Printer()
         accept(printer)
         return printer.toString()
     }
 
+    // TODO: delete! We have Searcher!
     fun isImplies(op: Operator): Boolean
 }
 
@@ -45,4 +47,6 @@ interface UnaryOperator : Operator {
 }
 
 // Leafs of our tree-like structure
+// TODO: think if we really need this (we don't use it as Primitive
+// TODO: introduce equal-like operator for equality (not `equal()`)
 interface Primitive : Node
