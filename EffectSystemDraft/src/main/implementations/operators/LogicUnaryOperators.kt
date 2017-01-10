@@ -3,10 +3,10 @@ package main.implementations.operators
 import main.structure.Node
 import main.structure.Operator
 import main.structure.UnaryOperator
-import main.structure.Visitor
+import main.structure.SchemaVisitor
 
 class Not(override val arg: Node) : UnaryOperator {
-    override fun accept(visitor: Visitor): Node {
+    override fun accept(visitor: SchemaVisitor): Node {
         return visitor.visit(this)
     }
 

@@ -5,11 +5,11 @@ import main.lang.Type
 import main.structure.BinaryOperator
 import main.structure.Node
 import main.structure.Operator
-import main.structure.Visitor
+import main.structure.SchemaVisitor
 import main.util.isSubtypeOf
 
 data class Is(override val left: Node, override val right: Type) : BinaryOperator {
-    override fun accept(visitor: Visitor): Node {
+    override fun accept(visitor: SchemaVisitor): Node {
         return visitor.visit(this)
     }
 
@@ -19,7 +19,7 @@ data class Is(override val left: Node, override val right: Type) : BinaryOperato
 }
 
 data class Equal(override val left: Node, override val right: Node) : BinaryOperator {
-    override fun accept(visitor: Visitor): Node {
+    override fun accept(visitor: SchemaVisitor): Node {
         return visitor.visit(this)
     }
 

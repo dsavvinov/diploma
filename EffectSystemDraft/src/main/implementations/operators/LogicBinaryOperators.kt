@@ -3,10 +3,10 @@ package main.implementations.operators
 import main.structure.BinaryOperator
 import main.structure.Node
 import main.structure.Operator
-import main.structure.Visitor
+import main.structure.SchemaVisitor
 
 data class Or(override val left: Node, override val right: Node) : BinaryOperator {
-    override fun accept(visitor: Visitor): Node {
+    override fun accept(visitor: SchemaVisitor): Node {
         return visitor.visit(this)
     }
 
@@ -16,7 +16,7 @@ data class Or(override val left: Node, override val right: Node) : BinaryOperato
 }
 
 data class And(override val left: Node, override val right: Node) : BinaryOperator {
-    override fun accept(visitor: Visitor): Node {
+    override fun accept(visitor: SchemaVisitor): Node {
         return visitor.visit(this)
     }
 

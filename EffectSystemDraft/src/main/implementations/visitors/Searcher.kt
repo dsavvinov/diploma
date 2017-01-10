@@ -7,7 +7,7 @@ import main.lang.*
 import main.lang.Function
 import main.structure.system.*
 
-class Searcher(val predicate: (Node) -> Boolean) : Visitor {
+class Searcher(val predicate: (Node) -> Boolean) : SchemaVisitor {
     val result: MutableList<Node> = mutableListOf()
 
     override fun visit(call: FunctionCall): Node {

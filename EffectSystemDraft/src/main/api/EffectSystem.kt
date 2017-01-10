@@ -1,6 +1,6 @@
 package main.api
 
-import main.implementations.visitors.Evaluator
+import main.implementations.visitors.CallParser
 import main.structure.EffectSchema
 import main.lang.Function
 import main.structure.system.FunctionCall
@@ -17,7 +17,7 @@ object EffectSystem {
     }
 
     fun inferEffects(call: FunctionCall): EffectSchema {
-        val evaluator = Evaluator(mutableMapOf())
+        val evaluator = CallParser(mutableMapOf())
         val result = evaluator.visit(call)
         return result
     }

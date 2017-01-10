@@ -1,27 +1,27 @@
 package main.implementations.visitors
 
-import main.lang.*
-import main.structure.EffectSchema
-import main.structure.Visitor
+import main.implementations.EffectImpl
+import main.implementations.EffectSchemaImpl
+import main.structure.*
 
-class Substitutor(val context: MutableMap<Variable, Constant>) : CallTreeVisitor<EffectSchema> {
-    override fun visit(call: FunctionCall): EffectSchema {
-        val functionEffectSchema = TODO()
-        
+class Substitutor(val effectSchema: EffectSchema, val substs: Map<Variable, Node>) : SchemaVisitor<Node> {
+    override fun visit(schema: EffectSchema): EffectSchema {
+        val substitutedEffects: List<Effect> = schema.effects.map { it.accept(this) as Effect }
+        return EffectSchemaImpl(substitutedEffects, effectSchema.returnVar)
     }
 
-    override fun visit(isOperator: IsOperator): EffectSchema {
+    override fun visit(effect: Effect): Effect {
+        val substitutedPremise = effect.premise.accept(this)
+        val substitutedConclusion = effect.conclusion.accept(this)
 
+        return EffectImpl(substitutedPremise, substitutedConclusion)
     }
 
-    override fun visit(equalOperator: EqualOperator): EffectSchema {
-
+    override fun visit(operator: Operator): Operator {
+        TODO("not implemented")
     }
 
-    override fun visit(variable: Variable): EffectSchema {
-    }
-
-    override fun visit(constant: Constant): EffectSchema {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun visit(variable: Variable): Node {
+        TODO("not implemented")
     }
 }

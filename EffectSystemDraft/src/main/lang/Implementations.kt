@@ -1,7 +1,8 @@
 package main.lang
 
-data class FunctionCallImpl(override val function: Function, override val args: List<LangNode>) : FunctionCall
-data class EqualOperatorImpl(override val left: LangNode, override val right: LangNode) : EqualOperator
-data class IsOperatorImpl(override val left: LangNode, override val right: LangNode) : IsOperator
+import main.structure.Variable
+
+data class FunctionCallImpl(override val function: Function, override val args: List<KtNode>) : FunctionCall
+data class EqualOperatorImpl(override val left: KtNode, override val right: KtNode) : EqualOperator
+data class IsOperatorImpl(override val left: KtNode, override val right: KtNode) : IsOperator
 data class VariableImpl(override val name: String, override val type: Type) : Variable
-data class ConstantImpl(override val value: Any, override val type: Type) : Constant

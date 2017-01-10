@@ -3,10 +3,10 @@ package main.implementations.operators
 import main.lang.Exception
 import main.structure.Operator
 import main.structure.UnaryOperator
-import main.structure.Visitor
+import main.structure.SchemaVisitor
 
 class Throws(override val arg: Exception) : UnaryOperator {
-    override fun accept(visitor: Visitor): Throws {
+    override fun accept(visitor: SchemaVisitor): Throws {
         return visitor.visit(this)
     }
 

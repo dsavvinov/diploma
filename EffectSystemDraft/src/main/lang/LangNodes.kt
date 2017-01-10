@@ -1,5 +1,7 @@
 package main.lang
 
+import main.structure.Node
+
 /**
  * All classes in this file represent simplified abstraction
  * over Kotlin language nodes and structures;
@@ -8,42 +10,30 @@ package main.lang
  * and should be replaced with real Kotlin-classes in future.
  */
 
-
-interface LangNode {
+interface KtNode {
     fun <T> accept(visitor: CallTreeVisitor<T>): T
 }
 
-interface FunctionCall : LangNode {
+interface FunctionCall : KtNode {
     val function: Function
-    val args: List<LangNode>
-
+    val args: List<KtNode>
     override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
 }
 
-interface EqualOperator : LangNode {
-    val left: LangNode
-    val right: LangNode
-
+interface IsOperator : KtNode {
+    val left: KtNode
+    val right: KtNode
     override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
 }
 
-interface IsOperator : LangNode {
-    val left: LangNode
-    val right: LangNode
-
+interface EqualOperator : KtNode {
+    val left: KtNode
+    val right: KtNode
     override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
 }
 
-interface Variable : LangNode {
+interface KtVariable : KtNode {
     val name: String
     val type: Type
-
-    override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
-}
-
-interface Constant : LangNode {
-    val value: Any
-    val type: Type
-
     override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
 }

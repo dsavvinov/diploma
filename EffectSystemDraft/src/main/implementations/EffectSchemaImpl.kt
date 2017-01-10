@@ -6,7 +6,7 @@ import main.lang.Variable
 import main.structure.Effect
 import main.structure.EffectSchema
 import main.structure.Operator
-import main.structure.Visitor
+import main.structure.SchemaVisitor
 import main.util.AnyType
 
 class EffectSchemaImpl(
@@ -14,7 +14,7 @@ class EffectSchemaImpl(
         override val returnVar: Variable = Variable("return", AnyType))
     : EffectSchema, Collection<Effect> by effects
 {
-    override fun accept(visitor: Visitor): EffectSchema {
+    override fun accept(visitor: SchemaVisitor): EffectSchema {
         return visitor.visit(this)
     }
 

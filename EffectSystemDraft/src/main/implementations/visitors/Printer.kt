@@ -7,7 +7,7 @@ import main.lang.*
 import main.lang.Function
 import main.structure.system.*
 
-class Printer : Visitor {
+class Printer : SchemaVisitor {
     override fun toString(): String {
         return sb.toString()
     }
