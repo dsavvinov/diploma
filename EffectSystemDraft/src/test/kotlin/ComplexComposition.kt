@@ -4,9 +4,9 @@ import main.api.EffectSystem
 import main.api.dsl.invoke
 import main.api.dsl.schema
 import main.implementations.operators.Equal
-import main.structure.Variable
+import main.lang.Variable
 import main.util.AnyNullType
-import main.structure.Function
+import main.lang.Function
 import main.implementations.operators.Not
 import main.util.BooleanType
 import main.util.NULL

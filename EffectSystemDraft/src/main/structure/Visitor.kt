@@ -1,26 +1,24 @@
 package main.structure
 
 import main.implementations.operators.*
+import main.lang.*
+import main.lang.Function
+import main.structure.system.*
 
 // TODO: think about selective visitor
 // TODO: returns Data, where Data is generic arg
-interface Visitor {
-    fun visit(call: FunctionCall): Node
-    fun visit(schema: EffectSchema): EffectSchema
-    fun visit(effect: Effect): Node
+interface Visitor<out T> {
+    fun visit(schema: EffectSchema): T
+    fun visit(effect: Effect): T
 
-    fun visit(isOperator: Is): Node
-    fun visit(equalOperator: Equal): Node
-    fun visit(throwsOperator: Throws): Throws
+    fun visit(isOperator: Is): T
+    fun visit(equalOperator: Equal): T
+    fun visit(throwsOperator: Throws): T
 
-    fun visit(or: Or): Node
-    fun visit(and: And): Node
-    fun visit(not: Not): Node
+    fun visit(or: Or): T
+    fun visit(and: And): T
+    fun visit(not: Not): T
 
-    fun visit(exception: Exception): Exception
-    fun visit(type: Type): Type
-    fun visit(variable: Variable): Node
-    fun visit(function: Function): Function
-    fun visit(constant: Constant): Constant
-    fun visit(booleanConstant: BooleanConstant): BooleanConstant
+    fun visit(variable: Variable): T
+    fun visit(constant: Constant): T
 }

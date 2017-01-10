@@ -2,8 +2,8 @@ package main.api
 
 import main.implementations.visitors.Evaluator
 import main.structure.EffectSchema
-import main.structure.Function
-import main.structure.FunctionCall
+import main.lang.Function
+import main.structure.system.FunctionCall
 
 object EffectSystem {
     private val schemas: MutableMap<Function, EffectSchema> = mutableMapOf()

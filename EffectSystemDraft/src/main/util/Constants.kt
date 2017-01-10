@@ -1,7 +1,7 @@
 package main.util
 
-import main.structure.Constant
-import main.structure.Type
+import main.lang.Constant
+import main.lang.Type
 
 val UnitType = Type("Unit")
 val unit = Constant(Unit, UnitType)
@@ -14,4 +14,4 @@ val NULL = Constant("null", AnyNullType) // a "little" bit inaccurate definition
 
 val StringType = Type("String")
 
-val AssertionFailedException = main.structure.Exception("AssertionFailedException")
+val AssertionFailedException = main.lang.Exception("AssertionFailedException")

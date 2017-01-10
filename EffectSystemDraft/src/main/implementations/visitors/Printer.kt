@@ -3,7 +3,9 @@ package main.implementations.visitors
 import main.implementations.*
 import main.implementations.operators.*
 import main.structure.*
-import main.structure.Function
+import main.lang.*
+import main.lang.Function
+import main.structure.system.*
 
 class Printer : Visitor {
     override fun toString(): String {

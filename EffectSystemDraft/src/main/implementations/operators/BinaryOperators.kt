@@ -1,6 +1,11 @@
 package main.implementations.operators
 
 import main.structure.*
+import main.lang.Type
+import main.structure.BinaryOperator
+import main.structure.Node
+import main.structure.Operator
+import main.structure.Visitor
 import main.util.isSubtypeOf
 
 data class Is(override val left: Node, override val right: Type) : BinaryOperator {

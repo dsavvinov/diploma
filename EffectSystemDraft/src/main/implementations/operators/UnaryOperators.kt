@@ -1,6 +1,6 @@
 package main.implementations.operators
 
-import main.structure.Exception
+import main.lang.Exception
 import main.structure.Operator
 import main.structure.UnaryOperator
 import main.structure.Visitor

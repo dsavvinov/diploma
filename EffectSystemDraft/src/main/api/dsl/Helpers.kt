@@ -1,10 +1,10 @@
 package main.api.dsl
 
-import main.implementations.FunctionCallImpl
-import main.structure.Function
-import main.structure.FunctionCall
+import main.lang.impls.FunctionCallImpl
+import main.lang.Function
+import main.structure.system.FunctionCall
 import main.structure.Node
-import main.structure.Variable
+import main.lang.Variable
 
 
 fun (Function).schema(description: (EffectSchemaBuilder).() -> Unit) =

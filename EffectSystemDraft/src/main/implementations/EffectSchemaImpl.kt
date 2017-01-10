@@ -1,7 +1,12 @@
 package main.implementations
 
 import main.structure.*
-import main.structure.Function
+import main.lang.Function
+import main.lang.Variable
+import main.structure.Effect
+import main.structure.EffectSchema
+import main.structure.Operator
+import main.structure.Visitor
 import main.util.AnyType
 
 class EffectSchemaImpl(

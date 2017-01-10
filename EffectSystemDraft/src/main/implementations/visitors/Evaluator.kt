@@ -4,7 +4,9 @@ import main.api.EffectSystem
 import main.implementations.*
 import main.implementations.operators.*
 import main.structure.*
-import main.structure.Function
+import main.lang.*
+import main.lang.Function
+import main.structure.system.*
 import main.util.AnyType
 import main.util.lift
 
@@ -35,7 +37,7 @@ class Evaluator(val context: MutableMap<Variable, Constant>) : Visitor {
         val evaluatedConclusion = effect.conclusion.accept(this)
 
         if (evaluatedPremise is EffectSchema) {
-            return EffectSchemaImpl(evaluatedPremise.effects.map { EffectImpl(it.premise, And(it.conclusion, evaluatedConclusion)) })
+            return EffectSchemaImpl(evaluatedPcremise.effects.map { EffectImpl(it.premise, And(it.conclusion, evaluatedConclusion)) })
         }
         return EffectSchemaImpl(listOf(EffectImpl(evaluatedPremise, evaluatedConclusion)))
     }

@@ -6,7 +6,10 @@ import main.api.dsl.schema
 import main.implementations.operators.Equal
 import main.implementations.operators.Throws
 import main.structure.*
-import main.structure.Function
+import main.lang.Function
+import main.lang.Variable
+import main.structure.EffectSchema
+import main.structure.system.FunctionCall
 import main.util.*
 import org.junit.BeforeClass
 import org.junit.Test
