@@ -1,4 +1,7 @@
-package main.structure
+package main.structure.schema
+
+import main.structure.schema.operators.Equal
+import main.structure.schema.operators.Is
 
 interface OperatorsVisitor<out T> {
     fun visit(isOperator: Is): T

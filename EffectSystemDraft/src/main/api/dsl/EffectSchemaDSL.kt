@@ -16,6 +16,12 @@ class EffectSchemaBuilder(val function: EsFunction) {
     }
 
     fun build(): EffectSchema {
-        return EffectSchemaImpl(function.returnVar, effects)
+        return EffectSchemaImpl(function, function.returnVar, effects)
     }
+}
+
+fun EsFunction.defineSchema(description: (EffectSchemaBuilder).() -> Unit): EffectSchema {
+    val effectSchema = EffectSchemaBuilder(this).apply { description() }.build()
+    this.schema = effectSchema
+    return effectSchema
 }

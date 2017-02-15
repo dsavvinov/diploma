@@ -8,9 +8,10 @@ import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.schema.*
+import main.structure.schema.operators.Equal
 import main.structure.schema.operators.Is
 
-class Mapper(val transform: (EsNode) -> EsNode) : SchemaVisitor<EsNode> {
+class Transformer(val transform: (EsNode) -> EsNode) : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode = transform(EffectSchemaImpl(
             schema.function,
             schema.returnVar,
@@ -57,4 +58,4 @@ class Mapper(val transform: (EsNode) -> EsNode) : SchemaVisitor<EsNode> {
     override fun visit(returns: Returns): EsNode = transform(returns)
 }
 
-fun (EsNode).map(transform: (EsNode) -> EsNode)
+fun (EsNode).transform(transform: (EsNode) -> EsNode) = Transformer(transform).let { accept(it) }
