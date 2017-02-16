@@ -52,3 +52,24 @@ val isZeroSchema = isZeroFunction.defineSchema {
     Equal(isZeroArg, 0.lift())          to Returns(true.lift(), EsBoolean)
     Not(Equal(isZeroArg, 0.lift()))     to Returns(false.lift(), EsBoolean)
 }
+
+/*
+fun notZero(val: Int) : Boolean = val != 0
+ */
+val notZeroArg = EsVariableImpl("val", EsInt)
+val notZeroFunction = EsFunction("notZero", listOf(notZeroArg), EsInt)
+val notZeroSchema = notZeroFunction.defineSchema {
+    Equal(notZeroArg, 0.lift())          to Returns(false.lift(), EsBoolean)
+    Not(Equal(notZeroArg, 0.lift()))     to Returns(true.lift(), EsBoolean)
+}
+
+/*
+fun myEq(lhs: Any?, rhs: Any?) : Boolean = lhs == rhs
+ */
+val myEqLhs = EsVariableImpl("lhs", EsAnyNull)
+val myEqRhs = EsVariableImpl("rhs", EsAnyNull)
+val myEqFunction = EsFunction("myEq", listOf(myEqLhs, myEqRhs), EsBoolean)
+val myEqSchema = myEqFunction.defineSchema {
+    Equal(myEqLhs, myEqRhs)      to Returns(true.lift(), EsBoolean)
+    Not(Equal(myEqLhs, myEqRhs)) to Returns(false.lift(), EsBoolean)
+}

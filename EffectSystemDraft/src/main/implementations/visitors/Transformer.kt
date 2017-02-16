@@ -59,3 +59,5 @@ class Transformer(val transform: (EsNode) -> EsNode) : SchemaVisitor<EsNode> {
 }
 
 fun (EsNode).transform(transform: (EsNode) -> EsNode) = Transformer(transform).let { accept(it) }
+
+fun (EsNode).transformReturn(transform: (Returns) -> EsNode) = transform { if (it is Returns) transform(it) else it }

@@ -104,7 +104,7 @@ class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
         val filteredLhs = andOp.left.accept(this) ?: return null
         val filteredRhs = andOp.right.accept(this) ?: return null
 
-        return Equal(filteredLhs, filteredRhs)
+        return And(filteredLhs, filteredRhs)
     }
 
     override fun visit(notOp: Not): EsNode? {
