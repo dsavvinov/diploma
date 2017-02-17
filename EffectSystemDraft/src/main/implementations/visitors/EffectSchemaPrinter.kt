@@ -42,15 +42,15 @@ class EffectSchemaPrinter : SchemaVisitor<Unit> {
     override fun visit(schema: EffectSchema) {
         sb.append("Schema of ${schema.function.name}: ")
         nested {
-            schema.effects.forEach { it.accept(this) }
+            schema.clauses.forEach { it.accept(this) }
         }
     }
 
-    override fun visit(effect: Effect): Unit {
+    override fun visit(clause: Clause): Unit {
         sb.append(indent)
-        effect.premise.accept(this)
+        clause.premise.accept(this)
         sb.append(" => ")
-        effect.conclusion.accept(this)
+        clause.conclusion.accept(this)
         sb.appendln()
     }
 

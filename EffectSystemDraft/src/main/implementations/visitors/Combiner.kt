@@ -1,6 +1,6 @@
 package main.implementations.visitors
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.EsBoolean
 import main.structure.general.EsConstant
@@ -16,11 +16,11 @@ import main.structure.schema.operators.evaluateIs
 
 class Combiner : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode {
-        val evaluatedEffects = schema.effects.flatMap {
+        val evaluatedEffects = schema.clauses.flatMap {
             val res = it.accept(this)
             when (res) {
-                is Effect -> listOf(res)
-                is EffectSchema -> res.effects
+                is Clause -> listOf(res)
+                is EffectSchema -> res.clauses
                 else -> throw IllegalStateException()
             }
         }
@@ -28,29 +28,29 @@ class Combiner : SchemaVisitor<EsNode> {
         return EffectSchemaImpl(schema.function, schema.returnVar, evaluatedEffects)
     }
 
-    override fun visit(effect: Effect): EsNode {
-        val evalPremise = effect.premise.accept(this)
-        val evalConclusion = effect.conclusion.accept(this)
+    override fun visit(clause: Clause): EsNode {
+        val evalPremise = clause.premise.accept(this)
+        val evalConclusion = clause.conclusion.accept(this)
 
         // TODO: we can flatten it further
         if (evalPremise is EffectSchema) {
-            val resultEffects = mutableListOf<Effect>()
-            evalPremise.effects.map(Effect::getAndRemoveOutcome)
+            val resultEffects = mutableListOf<Clause>()
+            evalPremise.clauses.map(Clause::getAndRemoveOutcome)
                     .forEach { (outcome, e) ->
                         if (outcome is Returns) {
                             if (outcome.value == true.lift()) {
                                 // If outcome on this codepath if true, then lhs implies its own rhs as well as conclusion of the whole clause
-                                resultEffects.add(EffectImpl(e.premise, e.conclusion.and(evalConclusion)))
+                                resultEffects.add(ClauseImpl(e.premise, e.conclusion.and(evalConclusion)))
                             }
                             // Note that we don't add codepaths that result in false
                         } else {
-                            // Otherwise we add original effect unchanged
-                            resultEffects.add(EffectImpl(e.premise, e.conclusion.and(outcome)))
+                            // Otherwise we add original clause unchanged
+                            resultEffects.add(ClauseImpl(e.premise, e.conclusion.and(outcome)))
                         }
                     }
             return EffectSchemaImpl(evalPremise.function, evalPremise.returnVar, resultEffects)
         }
-        return EffectImpl(evalPremise, evalConclusion)
+        return ClauseImpl(evalPremise, evalConclusion)
     }
 
     override fun visit(variable: EsVariable): EsNode = variable
@@ -123,18 +123,18 @@ class Combiner : SchemaVisitor<EsNode> {
 
 fun (EsNode).flatten() : EsNode = Combiner().let { accept(it) }
 
-fun (Effect).getOutcome() : EsNode = conclusion.firstOrNull { it is Returns || it is Throws }!!
+fun (Clause).getOutcome() : EsNode = conclusion.firstOrNull { it is Returns || it is Throws }!!
 
-fun (Effect).getAndRemoveOutcome() : Pair<EsNode, Effect> {
+fun (Clause).getAndRemoveOutcome() : Pair<EsNode, Clause> {
     var outcome : EsNode? = null
     val conclusionWithoutOutcome = conclusion.filter { if (it is Returns || it is Throws) { outcome = it; return@filter false } else return@filter true } ?: true.lift()
-    return Pair(outcome!!, EffectImpl(premise, conclusionWithoutOutcome))
+    return Pair(outcome!!, ClauseImpl(premise, conclusionWithoutOutcome))
 }
 
-fun (Effect).removeOutcome() : Effect {
+fun (Clause).removeOutcome() : Clause {
     var outcome : EsNode? = null
     val conclusionWithoutOutcome = conclusion.filter { (it is Returns || it is Throws).apply { outcome = it }.not() } ?: true.lift()
-    return EffectImpl(premise, conclusionWithoutOutcome)
+    return ClauseImpl(premise, conclusionWithoutOutcome)
 }
 
 fun (EsNode).and(node: EsNode) : EsNode = And(this, node)

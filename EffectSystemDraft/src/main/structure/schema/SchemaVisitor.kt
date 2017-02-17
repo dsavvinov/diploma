@@ -11,7 +11,7 @@ import main.structure.schema.operators.Is
 interface SchemaVisitor<out T> {
     fun visit(schema: EffectSchema): T
 
-    fun visit(effect: Effect): T
+    fun visit(clause: Clause): T
 
     fun visit(variable: EsVariable): T
 

@@ -5,12 +5,12 @@ import main.structure.general.*
 
 interface EffectSchema : EsNode {
     val returnVar: EsVariable
-    val effects: List<Effect>
+    val clauses: List<Clause>
     val function: EsFunction
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }
 
-interface Effect : EsNode {
+interface Clause : EsNode {
     val premise: EsNode
     val conclusion: EsNode
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)

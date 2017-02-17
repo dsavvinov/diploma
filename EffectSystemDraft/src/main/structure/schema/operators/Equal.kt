@@ -1,6 +1,6 @@
 package main.structure.schema.operators
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.implementations.visitors.*
 import main.structure.EsBoolean
@@ -8,7 +8,7 @@ import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsVariable
 import main.structure.lift
-import main.structure.schema.Effect
+import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
 import main.structure.schema.Returns
 import main.structure.schema.SchemaVisitor
@@ -31,18 +31,15 @@ fun (EffectSchema).evaluateEqual(rhs: EsVariable) : EsNode {
 }
 
 fun (EffectSchema).evaluateEqual(rhs: EsConstant) : EsNode {
-    val resultEffects = mutableListOf<Effect>()
-    effects.forEach { effect ->
+    val resultEffects = mutableListOf<Clause>()
+    clauses.forEach { effect ->
         val outcome = effect.getOutcome()
         if (outcome is Returns) {
             // Change return-clause of effect
             val modifiedEffect = effect.transform { node ->
                 if (node !is Returns) return@transform node
-                val tmp1 = node.value
-                val tmp2 = rhs
-                val tmp3 = node.value == rhs
                 return@transform Returns((node.value == rhs).lift(), EsBoolean)
-            } as Effect
+            } as Clause
             resultEffects.add(modifiedEffect)
         } else {
             // Otherwise, leave current outcome unchanged
@@ -53,7 +50,7 @@ fun (EffectSchema).evaluateEqual(rhs: EsConstant) : EsNode {
 }
 
 fun (EffectSchema).evaluateEqual(rhs: EffectSchema) : EsNode {
-    val product = effects.flatMap { lhsEffect -> rhs.effects.map { rhsEffect -> Pair(lhsEffect, rhsEffect) } }
+    val product = clauses.flatMap { lhsEffect -> rhs.clauses.map { rhsEffect -> Pair(lhsEffect, rhsEffect) } }
     val returns = product.map { (lhsEffect, rhsEffect) -> Pair(lhsEffect.getOutcome() as Returns, rhsEffect.getOutcome() as Returns) }
 
     val newEffects = product.zip(returns).map { (effects, outcomes) ->
@@ -61,23 +58,14 @@ fun (EffectSchema).evaluateEqual(rhs: EffectSchema) : EsNode {
         val (lhsEffect, rhsEffect) = effects
         val lhsWithoutOutcome = lhsEffect.removeOutcome()
         val rhsWithoutOutcome = rhsEffect.removeOutcome()
-        return@map EffectImpl(
+        return@map ClauseImpl(
                 premise = lhsWithoutOutcome.premise.and(rhsWithoutOutcome.premise),
                 conclusion = lhsWithoutOutcome.conclusion
                         .and(rhsWithoutOutcome.conclusion)
                         .and(Returns((leftOutcome.value!! == rightOutcome.value!!).lift(), EsBoolean))
         )
     }
-//    println("Lhs before combining:")
-//    println(print())
-//    println()
-//    println("Rhs before combining:")
-//    println(rhs.print())
-//    println()
-//    println("Result of combining:")
     val effectSchemaImpl = EffectSchemaImpl(function, returnVar, newEffects)
-//    println(effectSchemaImpl.print())
-//    println("=====================")
     return effectSchemaImpl
 }
 

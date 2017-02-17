@@ -17,14 +17,14 @@ class Searcher(val predicate: (EsNode) -> Boolean) : SchemaVisitor<Unit> {
         }
     }
     override fun visit(schema: EffectSchema) {
-        schema.effects.forEach { it.accept(this) }
+        schema.clauses.forEach { it.accept(this) }
         tryAdd(schema)
     }
 
-    override fun visit(effect: Effect) {
-        effect.premise.accept(this)
-        effect.conclusion.accept(this)
-        tryAdd(effect)
+    override fun visit(clause: Clause) {
+        clause.premise.accept(this)
+        clause.conclusion.accept(this)
+        tryAdd(clause)
     }
 
     override fun visit(variable: EsVariable) = tryAdd(variable)

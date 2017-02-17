@@ -1,6 +1,6 @@
 package main.implementations.visitors
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
@@ -19,19 +19,19 @@ class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
         return EffectSchemaImpl(
                 schema.function,
                 schema.returnVar,
-                schema.effects.map { it.accept(this) }.filterIsInstance<Effect>()
+                schema.clauses.map { it.accept(this) }.filterIsInstance<Clause>()
         )
     }
 
-    override fun visit(effect: Effect): EsNode? {
-        if (!predicate(effect)) {
+    override fun visit(clause: Clause): EsNode? {
+        if (!predicate(clause)) {
             return null
         }
 
-        val filteredPremise = effect.premise.accept(this) ?: return null
-        val filteredConclusion = effect.conclusion.accept(this) ?: return null
+        val filteredPremise = clause.premise.accept(this) ?: return null
+        val filteredConclusion = clause.conclusion.accept(this) ?: return null
 
-        return EffectImpl(filteredPremise, filteredConclusion)
+        return ClauseImpl(filteredPremise, filteredConclusion)
     }
 
     override fun visit(variable: EsVariable): EsNode? {

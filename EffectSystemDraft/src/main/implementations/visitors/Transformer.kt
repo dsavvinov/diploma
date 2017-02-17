@@ -1,6 +1,6 @@
 package main.implementations.visitors
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.implementations.general.EsVariableImpl
 import main.structure.general.EsConstant
@@ -15,12 +15,12 @@ class Transformer(val transform: (EsNode) -> EsNode) : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode = transform(EffectSchemaImpl(
             schema.function,
             schema.returnVar,
-            schema.effects.map { it.accept(this) as Effect }
+            schema.clauses.map { it.accept(this) as Clause }
     ))
 
-    override fun visit(effect: Effect): EsNode = transform(EffectImpl(
-            effect.premise.accept(this),
-            effect.conclusion.accept(this)
+    override fun visit(clause: Clause): EsNode = transform(ClauseImpl(
+            clause.premise.accept(this),
+            clause.conclusion.accept(this)
     ))
 
     override fun visit(variable: EsVariable): EsNode = transform(variable)

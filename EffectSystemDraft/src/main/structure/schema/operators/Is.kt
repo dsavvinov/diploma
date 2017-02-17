@@ -1,6 +1,6 @@
 package main.structure.schema.operators
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.implementations.general.EsConstantImpl
 import main.implementations.visitors.transform
@@ -10,7 +10,7 @@ import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.lift
-import main.structure.schema.Effect
+import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
 import main.structure.schema.Returns
 import main.structure.schema.SchemaVisitor
@@ -20,9 +20,9 @@ data class Is(val left: EsNode, val right: EsType) : EsNode {
 }
 
 fun (EffectSchema).evaluateIs(type: EsType) : EffectSchema {
-    val evaluatedEffects = mutableListOf<Effect>()
-    for (effect: Effect in effects) {
-        val rewritedConclusion = effect.conclusion.transform {
+    val evaluatedEffects = mutableListOf<Clause>()
+    for (clause: Clause in clauses) {
+        val rewritedConclusion = clause.conclusion.transform {
             // Skip all non-Returns staments
             if (it !is Returns) {
                 return@transform it
@@ -37,7 +37,7 @@ fun (EffectSchema).evaluateIs(type: EsType) : EffectSchema {
             return@transform Returns((it.type == type).lift(), EsBoolean)
         }
 
-        evaluatedEffects.add(EffectImpl(effect.premise, rewritedConclusion))
+        evaluatedEffects.add(ClauseImpl(clause.premise, rewritedConclusion))
     }
     return EffectSchemaImpl(function, returnVar, evaluatedEffects)
 }

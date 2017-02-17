@@ -1,6 +1,6 @@
 package main.implementations.visitors
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
@@ -13,15 +13,15 @@ import main.structure.schema.operators.Is
 
 class Evaluator : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode {
-        val effects = schema.effects.map { it.accept(this) as Effect }.filter { it.premise != false.lift() }
+        val effects = schema.clauses.map { it.accept(this) as Clause }.filter { it.premise != false.lift() }
         return EffectSchemaImpl(schema.function, schema.returnVar, effects)
     }
 
-    override fun visit(effect: Effect): EsNode {
-        val evaluatedPremise = effect.premise.accept(this)
-        val evaluatedConclusion = effect.conclusion.accept(this)
+    override fun visit(clause: Clause): EsNode {
+        val evaluatedPremise = clause.premise.accept(this)
+        val evaluatedConclusion = clause.conclusion.accept(this)
 
-        return EffectImpl(evaluatedPremise, evaluatedConclusion)
+        return ClauseImpl(evaluatedPremise, evaluatedConclusion)
     }
 
     override fun visit(variable: EsVariable): EsNode = variable

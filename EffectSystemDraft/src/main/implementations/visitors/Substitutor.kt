@@ -1,6 +1,6 @@
 package main.implementations.visitors
 
-import main.implementations.EffectImpl
+import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
@@ -14,11 +14,11 @@ import main.structure.schema.operators.Is
 class Substitutor(val substs: Map<EsVariable, EsNode>) : SchemaVisitor<EsNode> {
 
     override fun visit(schema: EffectSchema): EsNode {
-        val substitutedEffects = schema.effects.map { it.accept(this) as Effect }
+        val substitutedEffects = schema.clauses.map { it.accept(this) as Clause }
         return EffectSchemaImpl(schema.function, schema.returnVar, substitutedEffects)
     }
 
-    override fun visit(effect: Effect): EsNode = EffectImpl(effect.premise.accept(this), effect.conclusion.accept(this))
+    override fun visit(clause: Clause): EsNode = ClauseImpl(clause.premise.accept(this), clause.conclusion.accept(this))
 
     override fun visit(isOp: Is): EsNode = Is(isOp.left.accept(this), isOp.right.accept(this) as EsType)
 
