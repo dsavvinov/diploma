@@ -7,14 +7,18 @@ import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.lift
-import main.structure.schema.*
-import main.structure.schema.operators.Equal
-import main.structure.schema.operators.Is
+import main.structure.schema.Clause
+import main.structure.schema.EffectSchema
+import main.structure.schema.SchemaVisitor
+import main.structure.schema.effects.Returns
+import main.structure.schema.effects.Throws
+import main.structure.schema.operators.BinaryOperator
+import main.structure.schema.operators.UnaryOperator
 
 class Evaluator : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode {
         val effects = schema.clauses.map { it.accept(this) as Clause }.filter { it.premise != false.lift() }
-        return EffectSchemaImpl(schema.function, schema.returnVar, effects)
+        return EffectSchemaImpl(effects)
     }
 
     override fun visit(clause: Clause): EsNode {
@@ -30,61 +34,20 @@ class Evaluator : SchemaVisitor<EsNode> {
 
     override fun visit(type: EsType): EsNode = type
 
-    override fun visit(isOp: Is): EsNode {
-        val evLhs = isOp.left.accept(this)
-        val evRhs = isOp.right.accept(this) as EsType
+    override fun visit(binaryOperator: BinaryOperator): EsNode {
+        val evaluatedLhs = binaryOperator.left.accept(this)
+        val evaluatedRhs = binaryOperator.right.accept(this)
 
-        when(evLhs) {
-            is EsConstant -> return (evLhs.type == evRhs).lift()
-            is EsVariable -> return (evLhs.type == evRhs).lift()
-            else -> return Is(evLhs, evRhs)
-        }
+        return binaryOperator.newInstance(evaluatedLhs, evaluatedRhs).reduce()
     }
 
-    override fun visit(equalOp: Equal): EsNode {
-        val evLhs = equalOp.left.accept(this)
-        val evRhs = equalOp.right.accept(this)
+    override fun visit(unaryOperator: UnaryOperator): EsNode {
+        val evaluatedArg = unaryOperator.arg.accept(this)
 
-        if (evLhs is EsConstant && evRhs is EsConstant) {
-            return (evLhs.value == evRhs.value).lift()
-        }
-
-        return Equal(evLhs, evRhs)
+        return unaryOperator.newInstance(evaluatedArg).reduce()
     }
 
-    override fun visit(throwsOp: Throws): EsNode = throwsOp
-
-    override fun visit(orOp: Or): EsNode {
-        val evLhs = orOp.left.accept(this)
-        val evRhs = orOp.right.accept(this)
-
-        if (evLhs is EsConstant && evRhs is EsConstant) {
-            return (evLhs.value as Boolean || evRhs.value as Boolean).lift()
-        }
-
-        return Or(evLhs, evRhs)
-    }
-
-    override fun visit(andOp: And): EsNode {
-        val evLhs = andOp.left.accept(this)
-        val evRhs = andOp.right.accept(this)
-
-        if (evLhs is EsConstant && evRhs is EsConstant) {
-            return (evLhs.value as Boolean && evRhs.value as Boolean).lift()
-        }
-
-        return And(evLhs, evRhs)
-    }
-
-    override fun visit(notOp: Not): EsNode {
-        val evArg = notOp.arg.accept(this)
-
-        if (evArg is EsConstant) {
-            return (evArg.value as Boolean).not().lift()
-        }
-
-        return Not(evArg)
-    }
+    override fun visit(throws: Throws): EsNode = throws
 
     override fun visit(returns: Returns): EsNode = returns
 }

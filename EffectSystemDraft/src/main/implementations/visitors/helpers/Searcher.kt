@@ -1,12 +1,15 @@
-package main.implementations.visitors
+package main.implementations.visitors.helpers
 
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
-import main.structure.schema.*
-import main.structure.schema.operators.Equal
-import main.structure.schema.operators.Is
+import main.structure.schema.Clause
+import main.structure.schema.EffectSchema
+import main.structure.schema.SchemaVisitor
+import main.structure.schema.effects.Returns
+import main.structure.schema.operators.BinaryOperator
+import main.structure.schema.operators.UnaryOperator
 
 class Searcher(val predicate: (EsNode) -> Boolean) : SchemaVisitor<Unit> {
     val buffer: MutableList<EsNode> = mutableListOf()
@@ -16,6 +19,9 @@ class Searcher(val predicate: (EsNode) -> Boolean) : SchemaVisitor<Unit> {
             buffer.add(node)
         }
     }
+
+    override fun visit(node: EsNode) = tryAdd(node)
+
     override fun visit(schema: EffectSchema) {
         schema.clauses.forEach { it.accept(this) }
         tryAdd(schema)
@@ -33,38 +39,21 @@ class Searcher(val predicate: (EsNode) -> Boolean) : SchemaVisitor<Unit> {
 
     override fun visit(type: EsType) = tryAdd(type)
 
-    override fun visit(isOp: Is) {
-        isOp.left.accept(this)
-        isOp.right.accept(this)
-        tryAdd(isOp)
+    override fun visit(returns: Returns) {
+        returns.accept(this)
+        tryAdd(returns)
     }
 
-    override fun visit(equalOp: Equal) {
-        equalOp.left.accept(this)
-        equalOp.right.accept(this)
-        tryAdd(equalOp)
+    override fun visit(binaryOperator: BinaryOperator) {
+        binaryOperator.left.accept(this)
+        binaryOperator.right.accept(this)
+        tryAdd(binaryOperator)
     }
 
-    override fun visit(throwsOp: Throws): Unit = tryAdd(throwsOp)
-
-    override fun visit(orOp: Or) {
-        orOp.left.accept(this)
-        orOp.right.accept(this)
-        tryAdd(orOp)
+    override fun visit(unaryOperator: UnaryOperator) {
+        unaryOperator.arg.accept(this)
+        tryAdd(unaryOperator.arg)
     }
-
-    override fun visit(andOp: And) {
-        andOp.left.accept(this)
-        andOp.right.accept(this)
-        tryAdd(andOp)
-    }
-
-    override fun visit(notOp: Not) {
-        notOp.arg.accept(this)
-        tryAdd(notOp)
-    }
-
-    override fun visit(returns: Returns): Unit = tryAdd(returns)
 }
 
 fun (EsNode).findAll(predicate: (EsNode) -> Boolean): List<EsNode> =

@@ -2,17 +2,23 @@ package main.implementations.visitors
 
 import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
-import main.structure.EsBoolean
+import main.implementations.visitors.helpers.filter
+import main.implementations.visitors.helpers.firstOrNull
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.lift
-import main.structure.schema.*
-import main.structure.schema.operators.Equal
-import main.structure.schema.operators.Is
-import main.structure.schema.operators.evaluateEqual
-import main.structure.schema.operators.evaluateIs
+import main.structure.schema.Clause
+import main.structure.schema.EffectSchema
+import main.structure.schema.SchemaVisitor
+import main.structure.schema.effects.Calls
+import main.structure.schema.effects.Outcome
+import main.structure.schema.effects.Returns
+import main.structure.schema.effects.Throws
+import main.structure.schema.operators.And
+import main.structure.schema.operators.BinaryOperator
+import main.structure.schema.operators.UnaryOperator
 
 class Combiner : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode {
@@ -25,32 +31,14 @@ class Combiner : SchemaVisitor<EsNode> {
             }
         }
 
-        return EffectSchemaImpl(schema.function, schema.returnVar, evaluatedEffects)
+        return EffectSchemaImpl(evaluatedEffects)
     }
 
     override fun visit(clause: Clause): EsNode {
         val evalPremise = clause.premise.accept(this)
         val evalConclusion = clause.conclusion.accept(this)
 
-        // TODO: we can flatten it further
-        if (evalPremise is EffectSchema) {
-            val resultEffects = mutableListOf<Clause>()
-            evalPremise.clauses.map(Clause::getAndRemoveOutcome)
-                    .forEach { (outcome, e) ->
-                        if (outcome is Returns) {
-                            if (outcome.value == true.lift()) {
-                                // If outcome on this codepath if true, then lhs implies its own rhs as well as conclusion of the whole clause
-                                resultEffects.add(ClauseImpl(e.premise, e.conclusion.and(evalConclusion)))
-                            }
-                            // Note that we don't add codepaths that result in false
-                        } else {
-                            // Otherwise we add original clause unchanged
-                            resultEffects.add(ClauseImpl(e.premise, e.conclusion.and(outcome)))
-                        }
-                    }
-            return EffectSchemaImpl(evalPremise.function, evalPremise.returnVar, resultEffects)
-        }
-        return ClauseImpl(evalPremise, evalConclusion)
+        return ClauseImpl(evalPremise, evalConclusion).flatten()
     }
 
     override fun visit(variable: EsVariable): EsNode = variable
@@ -59,81 +47,37 @@ class Combiner : SchemaVisitor<EsNode> {
 
     override fun visit(type: EsType): EsNode = type
 
-    override fun visit(isOp: Is): EsNode {
-        val lhs = isOp.left.accept(this)
-        val rhs = isOp.right.accept(this) as EsType
+    override fun visit(binaryOperator: BinaryOperator): EsNode {
+        val lhs = binaryOperator.left.accept(this)
+        val rhs = binaryOperator.right.accept(this)
 
-        // TODO: derp, so bad
-        return when(lhs) {
-            is EffectSchema -> lhs.evaluateIs(rhs)
-            is EsVariable -> lhs.evaluateIs(rhs)
-            is EsConstant -> lhs.evaluateIs(rhs)
-            else -> throw IllegalStateException("Unsupported type of left operand for Is-clause: $lhs")
-        }
+        return binaryOperator.newInstance(lhs, rhs)
     }
 
-    override fun visit(equalOp: Equal): EsNode {
-        val lhs = equalOp.left.accept(this)
-        val rhs = equalOp.right.accept(this)
+    override fun visit(unaryOperator: UnaryOperator): EsNode {
+        val arg = unaryOperator.arg.accept(this)
 
-        return when (lhs) {
-            is EffectSchema -> lhs.evaluateEqual(rhs)
-            is EsVariable -> Equal(lhs, rhs)
-            is EsConstant -> lhs.evaluateEqual(rhs)
-            else -> throw IllegalStateException("Unsupported type of lhs for Equal-cluase: $lhs")
-        }
+        return unaryOperator.newInstance(arg)
     }
 
-    override fun visit(throwsOp: Throws): EsNode = throwsOp
+    override fun visit(throws: Throws) = throws
 
-    override fun visit(orOp: Or): EsNode {
-        val lhs = orOp.left.accept(this)
-        val rhs = orOp.right.accept(this)
-
-        if (lhs is EsConstant && rhs is EsConstant) {
-            return (lhs == true.lift() || rhs == true.lift()).lift()
-        } else {
-            return Or(lhs, rhs)
-        }
+    override fun visit(returns: Returns): EsNode {
+        val arg = returns.value.accept(this)
+        return Returns(arg, returns.type)
     }
 
-    override fun visit(andOp: And): EsNode {
-        val lhs = andOp.left.accept(this)
-        val rhs = andOp.right.accept(this)
-
-        if (lhs is EsConstant && rhs is EsConstant) {
-            return (lhs == true.lift() && rhs == true.lift()).lift()
-        } else {
-            return And(lhs, rhs)
-        }
-    }
-
-    override fun visit(notOp: Not): EsNode {
-        val arg = notOp.arg.accept(this)
-
-        when (arg) {
-            is EsConstant -> return (arg != true.lift()).lift()
-            is EffectSchema -> return arg.transformReturn { Returns((it.value == false.lift()).lift(), EsBoolean) }
-            else -> return Not(arg)
-        }
-    }
-
-    override fun visit(returns: Returns): EsNode = returns
+    override fun visit(calls: Calls): EsNode = calls
 }
 
 fun (EsNode).flatten() : EsNode = Combiner().let { accept(it) }
 
-fun (Clause).getOutcome() : EsNode = conclusion.firstOrNull { it is Returns || it is Throws }!!
+// TODO: another example :)
+fun (EsNode).getOutcome() : Outcome = firstOrNull { it is Returns || it is Throws } as Outcome
 
-fun (Clause).getAndRemoveOutcome() : Pair<EsNode, Clause> {
-    var outcome : EsNode? = null
-    val conclusionWithoutOutcome = conclusion.filter { if (it is Returns || it is Throws) { outcome = it; return@filter false } else return@filter true } ?: true.lift()
-    return Pair(outcome!!, ClauseImpl(premise, conclusionWithoutOutcome))
-}
 
 fun (Clause).removeOutcome() : Clause {
-    var outcome : EsNode? = null
-    val conclusionWithoutOutcome = conclusion.filter { (it is Returns || it is Throws).apply { outcome = it }.not() } ?: true.lift()
+    val conclusionWithoutOutcome = conclusion.filter { it !is Returns && it !is Throws } ?: true.lift()
     return ClauseImpl(premise, conclusionWithoutOutcome)
 }
 

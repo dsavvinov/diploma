@@ -1,37 +1,41 @@
 package main.structure.schema
 
-import main.structure.general.*
+import main.implementations.visitors.helpers.filter
+import main.implementations.visitors.helpers.toList
+import main.structure.general.EsNode
+import main.structure.schema.effects.EffectsPipelineFlags
+import main.structure.schema.operators.BinaryOperator
 
 
 interface EffectSchema : EsNode {
-    val returnVar: EsVariable
     val clauses: List<Clause>
-    val function: EsFunction
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }
 
 interface Clause : EsNode {
     val premise: EsNode
     val conclusion: EsNode
+
+    fun effectsAsList() : List<Effect> = conclusion.filter { it is Effect }.toList() as List<Effect>
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }
 
-data class Throws(val exception: Any?) : EsNode {
+interface Effect : EsNode {
+    fun merge(left: List<Effect>, right: List<Effect>, flags: EffectsPipelineFlags, operator: BinaryOperator) : List<Effect>
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }
 
-data class Or(val left: EsNode, val right: EsNode) : EsNode {
-    override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
-}
+interface Operator : EsNode {
+    /**
+     * Merges arguments in EffectSchema if at least one of them was EffectSchema.
+     * Otherwise, returns `this` unchanged
+     */
+    fun flatten(): EsNode
 
-data class And(val left: EsNode, val right: EsNode) : EsNode {
-    override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
-}
+    /**
+     * Tries to evaluate operator on its arguments, returning `this` unchanged if evaluation is impossible.
+     */
+    fun reduce(): EsNode
 
-data class Not(val arg: EsNode) : EsNode {
-    override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
-}
-
-data class Returns(val value: EsConstant?, val type: EsType?) : EsNode {
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }

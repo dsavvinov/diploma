@@ -16,7 +16,7 @@ class EffectSchemaBuilder(val function: EsFunction) {
     }
 
     fun build(): EffectSchema {
-        return EffectSchemaImpl(function, function.returnVar, clauses)
+        return EffectSchemaImpl(clauses)
     }
 }
 

@@ -8,7 +8,7 @@ import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 
 interface EsNode {
-    fun <T> accept(visitor: SchemaVisitor<T>): T
+    fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }
 
 interface EsVariable : EsNode, CtNode {
@@ -17,6 +17,8 @@ interface EsVariable : EsNode, CtNode {
 
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
     override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
+
+    fun castToSchema(): EffectSchema
 }
 
 interface EsConstant : EsNode, CtNode {
@@ -25,6 +27,8 @@ interface EsConstant : EsNode, CtNode {
 
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
     override fun <T> accept(visitor: CallTreeVisitor<T>): T = visitor.visit(this)
+
+    fun castToSchema(): EffectSchema
 }
 
 // TODO: composition or inheritance? Depends on the real KtType, I think

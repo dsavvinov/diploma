@@ -4,7 +4,7 @@ import main.api.dsl.*
 import main.implementations.general.EsVariableImpl
 import main.implementations.visitors.flatten
 import main.implementations.visitors.generateEffectSchema
-import main.implementations.visitors.print
+import main.implementations.visitors.helpers.print
 import main.structure.EsInt
 import main.structure.call.CtCall
 import main.structure.lift

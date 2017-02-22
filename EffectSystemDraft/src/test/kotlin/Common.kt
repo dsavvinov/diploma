@@ -5,8 +5,11 @@ import main.implementations.general.EsVariableImpl
 import main.structure.*
 import main.structure.general.EsFunction
 import main.structure.schema.*
+import main.structure.schema.effects.Returns
+import main.structure.schema.effects.Throws
 import main.structure.schema.operators.Equal
 import main.structure.schema.operators.Is
+import main.structure.schema.operators.Not
 
 /*
 fun assert(value: Boolean) {

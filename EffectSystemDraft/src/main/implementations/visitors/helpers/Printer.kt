@@ -1,12 +1,14 @@
-package main.implementations.visitors
+package main.implementations.visitors.helpers
 
 import main.structure.general.EsConstant
-import main.structure.general.EsFunction
 import main.structure.general.EsType
 import main.structure.general.EsVariable
-import main.structure.schema.*
-import main.structure.schema.operators.Equal
-import main.structure.schema.operators.Is
+import main.structure.schema.Clause
+import main.structure.schema.EffectSchema
+import main.structure.schema.SchemaVisitor
+import main.structure.schema.effects.Returns
+import main.structure.schema.effects.Throws
+import main.structure.schema.operators.*
 
 class EffectSchemaPrinter : SchemaVisitor<Unit> {
     override fun toString(): String {
@@ -40,7 +42,6 @@ class EffectSchemaPrinter : SchemaVisitor<Unit> {
     }
 
     override fun visit(schema: EffectSchema) {
-        sb.append("Schema of ${schema.function.name}: ")
         nested {
             schema.clauses.forEach { it.accept(this) }
         }
@@ -54,37 +55,37 @@ class EffectSchemaPrinter : SchemaVisitor<Unit> {
         sb.appendln()
     }
 
-    override fun visit(isOp: Is): Unit {
-        isOp.left.accept(this)
+    override fun visit(isOperator: Is): Unit {
+        isOperator.left.accept(this)
         sb.append(" is ")
-        isOp.right.accept(this)
+        isOperator.right.accept(this)
     }
 
-    override fun visit(equalOp: Equal): Unit {
-        equalOp.left.accept(this)
+    override fun visit(equalOperator: Equal): Unit {
+        equalOperator.left.accept(this)
         sb.append(" == ")
-        equalOp.right.accept(this)
+        equalOperator.right.accept(this)
     }
 
-    override fun visit(throwsOp: Throws): Unit{
-        sb.append("Throws ${throwsOp.exception}")
+    override fun visit(throws: Throws): Unit {
+        sb.append("Throws ${throws.exception}")
     }
 
-    override fun visit(orOp: Or): Unit {
-        inBrackets { orOp.left.accept(this) }
+    override fun visit(or: Or): Unit {
+        inBrackets { or.left.accept(this) }
         sb.append(" OR ")
-        inBrackets { orOp.right.accept(this) }
+        inBrackets { or.right.accept(this) }
     }
 
-    override fun visit(andOp: And): Unit {
-        inBrackets { andOp.left.accept(this) }
+    override fun visit(and: And): Unit {
+        inBrackets { and.left.accept(this) }
         sb.append(" AND ")
-        inBrackets { andOp.right.accept(this) }
+        inBrackets { and.right.accept(this) }
     }
 
-    override fun visit(notOp: Not): Unit {
+    override fun visit(not: Not): Unit {
         sb.append("NOT")
-        inBrackets { notOp.arg.accept(this) }
+        inBrackets { not.arg.accept(this) }
     }
 
     override fun visit(type: EsType): Unit {
@@ -100,7 +101,7 @@ class EffectSchemaPrinter : SchemaVisitor<Unit> {
     }
 
     override fun visit(returns: Returns) {
-        sb.append("returns ${returns.value ?: "???"}: ${returns.type ?: "???"}")
+        sb.append("returns ${returns.value}: ${returns.type ?: "???"}")
     }
 }
 
