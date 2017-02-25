@@ -3,7 +3,6 @@ package main.implementations.visitors.helpers
 import main.structure.general.EsConstant
 import main.structure.general.EsType
 import main.structure.general.EsVariable
-import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.effects.Returns
@@ -43,16 +42,15 @@ class EffectSchemaPrinter : SchemaVisitor<Unit> {
 
     override fun visit(schema: EffectSchema) {
         nested {
-            schema.clauses.forEach { it.accept(this) }
+            schema.clauses.forEach { it.accept(this); sb.appendln() }
         }
     }
 
-    override fun visit(clause: Clause): Unit {
+    override fun visit(imply: Imply): Unit {
         sb.append(indent)
-        clause.premise.accept(this)
+        imply.left.accept(this)
         sb.append(" => ")
-        clause.conclusion.accept(this)
-        sb.appendln()
+        imply.right.accept(this)
     }
 
     override fun visit(isOperator: Is): Unit {
@@ -62,9 +60,11 @@ class EffectSchemaPrinter : SchemaVisitor<Unit> {
     }
 
     override fun visit(equalOperator: Equal): Unit {
-        equalOperator.left.accept(this)
-        sb.append(" == ")
-        equalOperator.right.accept(this)
+        inBrackets {
+            equalOperator.left.accept(this)
+            sb.append(" == ")
+            equalOperator.right.accept(this)
+        }
     }
 
     override fun visit(throws: Throws): Unit {

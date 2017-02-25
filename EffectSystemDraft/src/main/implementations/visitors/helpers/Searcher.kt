@@ -4,7 +4,6 @@ import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
-import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.effects.Returns
@@ -27,12 +26,6 @@ class Searcher(val predicate: (EsNode) -> Boolean) : SchemaVisitor<Unit> {
         tryAdd(schema)
     }
 
-    override fun visit(clause: Clause) {
-        clause.premise.accept(this)
-        clause.conclusion.accept(this)
-        tryAdd(clause)
-    }
-
     override fun visit(variable: EsVariable) = tryAdd(variable)
 
     override fun visit(constant: EsConstant) = tryAdd(constant)
@@ -40,7 +33,7 @@ class Searcher(val predicate: (EsNode) -> Boolean) : SchemaVisitor<Unit> {
     override fun visit(type: EsType) = tryAdd(type)
 
     override fun visit(returns: Returns) {
-        returns.accept(this)
+        returns.value.accept(this)
         tryAdd(returns)
     }
 

@@ -8,15 +8,7 @@ import main.structure.schema.operators.BinaryOperator
 
 
 interface EffectSchema : EsNode {
-    val clauses: List<Clause>
-    override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
-}
-
-interface Clause : EsNode {
-    val premise: EsNode
-    val conclusion: EsNode
-
-    fun effectsAsList() : List<Effect> = conclusion.filter { it is Effect }.toList() as List<Effect>
+    val clauses: List<EsNode>
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 }
 

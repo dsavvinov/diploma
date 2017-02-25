@@ -13,7 +13,6 @@ interface SchemaVisitor<out T> {
     // Generic nodes
     fun visit(node: EsNode): T = throw IllegalStateException("Top-level of nodes hierarchy reached, no overloads found")
     fun visit(schema: EffectSchema): T = visit(schema as EsNode)
-    fun visit(clause: Clause): T = visit(clause as EsNode)
     fun visit(variable: EsVariable): T = visit(variable as EsNode)
     fun visit(constant: EsConstant): T = visit(constant as EsNode)
     fun visit(type: EsType): T = visit(type as EsNode)
@@ -27,6 +26,7 @@ interface SchemaVisitor<out T> {
 
     fun visit(isOperator: Is): T = visit(isOperator as BinaryOperator)
     fun visit(equalOperator: Equal): T = visit(equalOperator as BinaryOperator)
+    fun visit(imply: Imply): T = visit(imply as BinaryOperator)
 
     fun visit(or: Or): T = visit(or as BinaryOperator)
     fun visit(and: And): T = visit(and as BinaryOperator)

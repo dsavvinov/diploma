@@ -10,8 +10,18 @@ data class And(override val left: EsNode, override val right: EsNode) : BinaryOp
     override fun newInstance(left: EsNode, right: EsNode): BinaryOperator = And(left, right)
 
     override fun reduce(): EsNode {
-        if (left is EsConstant && right is EsConstant) {
-            return (left.value == right.value).lift()
+        if (left is EsConstant) {
+            if (left.value == false) {
+                return false.lift()
+            }
+            return right
+        }
+
+        if (right is EsConstant) {
+            if (right.value == false) {
+                return false.lift()
+            }
+            return left
         }
 
         return this

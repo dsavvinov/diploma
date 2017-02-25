@@ -1,18 +1,17 @@
 package main.implementations.visitors.helpers
 
-import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
-import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.effects.Calls
 import main.structure.schema.effects.Returns
 import main.structure.schema.effects.Throws
 import main.structure.schema.operators.BinaryOperator
+import main.structure.schema.operators.Imply
 import main.structure.schema.operators.UnaryOperator
 
 class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
@@ -20,17 +19,8 @@ class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
         if (!predicate(schema)) return null
 
         return EffectSchemaImpl(
-                schema.clauses.map { it.accept(this) }.filterIsInstance<Clause>()
+                schema.clauses.map { it.accept(this) }.filterIsInstance<Imply>()
         )
-    }
-
-    override fun visit(clause: Clause): EsNode? {
-        if (!predicate(clause)) return null
-
-        val filteredPremise = clause.premise.accept(this) ?: return null
-        val filteredConclusion = clause.conclusion.accept(this) ?: return null
-
-        return ClauseImpl(filteredPremise, filteredConclusion)
     }
 
     override fun visit(variable: EsVariable): EsNode? {
@@ -74,9 +64,9 @@ class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
     override fun visit(returns: Returns): EsNode? {
         if (!predicate(returns)) return null
 
-        val filteredArg = returns.value.accept(this) ?: return null
+//        val filteredArg = returns.value.accept(this) ?: return null
 
-        return Returns(filteredArg, returns.type)
+        return returns
     }
 
     override fun visit(calls: Calls): EsNode? {

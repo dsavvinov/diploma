@@ -1,6 +1,5 @@
 package main.implementations.visitors
 
-import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.implementations.visitors.helpers.filter
 import main.implementations.visitors.helpers.firstOrNull
@@ -9,7 +8,6 @@ import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.lift
-import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.effects.Calls
@@ -18,6 +16,7 @@ import main.structure.schema.effects.Returns
 import main.structure.schema.effects.Throws
 import main.structure.schema.operators.And
 import main.structure.schema.operators.BinaryOperator
+import main.structure.schema.operators.Imply
 import main.structure.schema.operators.UnaryOperator
 
 class Combiner : SchemaVisitor<EsNode> {
@@ -25,20 +24,13 @@ class Combiner : SchemaVisitor<EsNode> {
         val evaluatedEffects = schema.clauses.flatMap {
             val res = it.accept(this)
             when (res) {
-                is Clause -> listOf(res)
+                is Imply -> listOf(res)
                 is EffectSchema -> res.clauses
                 else -> throw IllegalStateException()
             }
         }
 
         return EffectSchemaImpl(evaluatedEffects)
-    }
-
-    override fun visit(clause: Clause): EsNode {
-        val evalPremise = clause.premise.accept(this)
-        val evalConclusion = clause.conclusion.accept(this)
-
-        return ClauseImpl(evalPremise, evalConclusion).flatten()
     }
 
     override fun visit(variable: EsVariable): EsNode = variable
@@ -51,13 +43,13 @@ class Combiner : SchemaVisitor<EsNode> {
         val lhs = binaryOperator.left.accept(this)
         val rhs = binaryOperator.right.accept(this)
 
-        return binaryOperator.newInstance(lhs, rhs)
+        return binaryOperator.newInstance(lhs, rhs).flatten()
     }
 
     override fun visit(unaryOperator: UnaryOperator): EsNode {
         val arg = unaryOperator.arg.accept(this)
 
-        return unaryOperator.newInstance(arg)
+        return unaryOperator.newInstance(arg).flatten()
     }
 
     override fun visit(throws: Throws) = throws
@@ -76,9 +68,15 @@ fun (EsNode).flatten() : EsNode = Combiner().let { accept(it) }
 fun (EsNode).getOutcome() : Outcome = firstOrNull { it is Returns || it is Throws } as Outcome
 
 
-fun (Clause).removeOutcome() : Clause {
-    val conclusionWithoutOutcome = conclusion.filter { it !is Returns && it !is Throws } ?: true.lift()
-    return ClauseImpl(premise, conclusionWithoutOutcome)
+fun (Imply).removeOutcome() : Imply {
+    val conclusionWithoutOutcome = right.filter { it !is Returns && it !is Throws } ?: true.lift()
+    return Imply(left, conclusionWithoutOutcome)
 }
 
-fun (EsNode).and(node: EsNode) : EsNode = And(this, node)
+fun (Imply).removeReturns(): Imply = Imply(left, right.filter { it !is Returns } ?: true.lift())
+
+fun (EsNode).and(node: EsNode) : EsNode {
+    if (this == true.lift()) return node
+    if (node == true.lift()) return this
+    return And(this, node)
+}

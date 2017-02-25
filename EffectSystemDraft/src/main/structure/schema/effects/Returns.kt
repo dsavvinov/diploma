@@ -19,4 +19,6 @@ data class Returns(val value: EsNode, val type: EsType?) : Outcome {
             else -> throw IllegalStateException("Unexpected Outcome-type: $rightOutcome")
         }
     }
+
+
 }

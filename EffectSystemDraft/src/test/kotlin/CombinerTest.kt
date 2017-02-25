@@ -23,9 +23,7 @@ class CombinerTest {
 
     @Test
     fun shouldCombineSimpleIs() {
-        runTest {
-            isStringFunction.invoke("hello".lift())
-        }
+        runTest { isStringFunction.invoke("hello".lift()) }
     }
 
     @Test

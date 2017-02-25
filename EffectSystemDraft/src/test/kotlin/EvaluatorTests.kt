@@ -26,6 +26,31 @@ class EvaluatorTests {
     }
 
     @Test
+    fun shouldEvaluateSimpleIs() {
+        runTest { isStringFunction.invoke("hello".lift()) }
+    }
+
+    @Test
+    fun shouldEvaluateNestedIs() {
+        runTest { isBooleanFunction(isStringFunction("hello".lift())) }
+    }
+
+    @Test
+    fun shouldEvaluateEqual() {
+        runTest { assertFunction(true.lift()) }
+    }
+
+    @Test
+    fun shouldEvaluateEqual2() {
+        runTest { assertFunction(false.lift()) }
+    }
+
+    @Test
+    fun shouldEvaluateNestedEqual() {
+        runTest { assertFunction(isZeroFunction(1.lift())) }
+    }
+
+    @Test
     fun shouldEvaluateNestedTwoArgs() {
         runTest { myEqFunction(isZeroFunction(1.lift()), isZeroFunction(0.lift())) }
     }
@@ -36,8 +61,7 @@ class EvaluatorTests {
     }
 
     @Test
-    fun shouldEvaluateVariables() {
-        val x = EsVariableImpl("x", EsInt)
-        runTest { myEqFunction(isZeroFunction(x), notZeroFunction(x)) }
+    fun shouldEvaluateVar() {
+        runTest { assertFunction(isZeroFunction(EsVariableImpl("x", EsInt))) }
     }
 }

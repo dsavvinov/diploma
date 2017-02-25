@@ -1,18 +1,17 @@
 package main.api.dsl
 
-import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.structure.general.EsFunction
 import main.structure.general.EsNode
-import main.structure.schema.Clause
 import main.structure.schema.EffectSchema
+import main.structure.schema.operators.Imply
 
 class EffectSchemaBuilder(val function: EsFunction) {
-    val clauses: MutableList<Clause> = mutableListOf()
+    val clauses: MutableList<Imply> = mutableListOf()
     val returnVar = function.returnVar
 
     infix fun (EsNode).to(other: EsNode): Unit {
-        clauses += ClauseImpl(this, other)
+        clauses += Imply(this, other)
     }
 
     fun build(): EffectSchema {

@@ -1,10 +1,14 @@
 package main.structure.schema.operators
 
-import main.implementations.ClauseImpl
 import main.implementations.EffectSchemaImpl
 import main.implementations.visitors.and
+import main.implementations.visitors.helpers.print
 import main.implementations.visitors.helpers.transformReturn
+import main.structure.general.EsConstant
 import main.structure.general.EsNode
+import main.structure.general.EsType
+import main.structure.general.EsVariable
+import main.structure.lift
 import main.structure.schema.EffectSchema
 import main.structure.schema.Operator
 import main.structure.schema.SchemaVisitor
@@ -27,7 +31,7 @@ interface UnaryOperator : Operator {
 
         val schema = arg as EffectSchema
         val newClauses = schema.clauses.map {
-            it.transformReturn { Returns(newInstance(it.value), it.type) }
+            (it as Imply).transformReturn { Returns(newInstance(it.value), it.type) }
         }
 
         return EffectSchemaImpl(newClauses)
@@ -44,32 +48,44 @@ interface BinaryOperator : Operator {
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 
     override fun flatten(): EsNode {
-        return when (left) {
-            is EffectSchema -> {
-                val leftSchema = left as EffectSchema
-                if (right is EffectSchema) {
-                    // TODO: nice example of where effects can be used!
-                    val rightSchema = right as EffectSchema
+        val leftSchema: EffectSchema = left.castToSchema()
+        val rightSchema: EffectSchema = right.castToSchema()
 
-                    val newClauses = rightSchema.clauses.flatMap { rightClause ->
-                        leftSchema.clauses.map { leftClause ->
-                            val flags = EffectsPipelineFlags()
-                            ClauseImpl(
-                                    leftClause.premise.and(rightClause.premise),
-                                    leftClause.effectsAsList().flatMap {
-                                        it.merge(leftClause.effectsAsList(), rightClause.effectsAsList(), flags, this)
-                                    }
-                            )
-                        }
-                    }
+        return leftSchema.flattenWith(rightSchema, operator = this)
+    }
+}
 
-                    EffectSchemaImpl(newClauses)
-                } else {
-                  TODO()
-                }
+fun (EsNode).castToSchema(): EffectSchema {
+    return when (this) {
+        is EffectSchema -> this
+        is EsVariable -> this.castToSchema()
+        is EsConstant -> this.castToSchema()
+        else -> throw IllegalArgumentException("Type doesn't support casting to ES: $this")
+    }
+}
+
+private fun (EffectSchema).flattenWith(rightSchema: EffectSchema, operator: BinaryOperator): EffectSchema {
+//    println("Flattening:")
+//    println(this.print())
+//    println("and")
+//    println(rightSchema.print())
+
+    val newClauses = rightSchema.clauses.flatMap { rightClause ->
+        this.clauses.map { leftClause ->
+            val flags = EffectsPipelineFlags()
+            val left = (leftClause as Imply).left.and((rightClause as Imply).left)
+            val right = leftClause.effectsAsList().flatMap {
+                it.merge(leftClause.effectsAsList(), rightClause.effectsAsList(), flags, operator)
             }
-
-            else -> TODO()
+            Imply(left, right)
         }
     }
+
+    val result = EffectSchemaImpl(newClauses)
+//    println("result:")
+//    println(result.print())
+//    println("================")
+//    println()
+
+    return EffectSchemaImpl(newClauses)
 }
