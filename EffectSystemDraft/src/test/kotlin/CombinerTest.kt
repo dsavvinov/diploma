@@ -1,12 +1,12 @@
 package test.kotlin
 
-import main.api.dsl.*
-import main.implementations.general.EsVariableImpl
-import main.implementations.visitors.flatten
-import main.implementations.visitors.generateEffectSchema
-import main.implementations.visitors.helpers.print
+import main.api.dsl.invoke
+import main.visitors.flatten
+import main.visitors.generateEffectSchema
+import main.visitors.helpers.print
 import main.structure.EsInt
 import main.structure.call.CtCall
+import main.structure.general.EsVariable
 import main.structure.lift
 import main.structure.schema.EffectSchema
 import org.junit.Test
@@ -58,6 +58,6 @@ class CombinerTest {
 
     @Test
     fun shouldCombineVar() {
-        runTest { assertFunction(isZeroFunction(EsVariableImpl("x", EsInt))) }
+        runTest { assertFunction(isZeroFunction(EsVariable("x", EsInt))) }
     }
 }

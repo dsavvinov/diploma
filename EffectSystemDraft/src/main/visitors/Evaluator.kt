@@ -1,6 +1,5 @@
-package main.implementations.visitors
+package main.visitors
 
-import main.implementations.EffectSchemaImpl
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
@@ -14,11 +13,14 @@ import main.structure.schema.operators.BinaryOperator
 import main.structure.schema.operators.Imply
 import main.structure.schema.operators.UnaryOperator
 
+/**
+ * Tries to advance evaluation in a given EffectSchema-tree.
+ */
 class Evaluator : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode {
         val effects = schema.clauses.map { it.accept(this) }
-        val filteredEffects = effects.filter { it !is Imply || it.left != false.lift() }
-        return EffectSchemaImpl(filteredEffects)
+        val filteredEffects = effects.filterIsInstance<Imply>().filter { it.left != false.lift() }
+        return EffectSchema(filteredEffects)
     }
 
     override fun visit(variable: EsVariable): EsNode = variable

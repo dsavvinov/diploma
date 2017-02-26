@@ -1,8 +1,8 @@
 package test.kotlin
 
 import main.api.dsl.invoke
-import main.implementations.visitors.generateEffectSchema
-import main.implementations.visitors.helpers.print
+import main.visitors.generateEffectSchema
+import main.visitors.helpers.print
 import main.structure.lift
 import org.junit.Test
 

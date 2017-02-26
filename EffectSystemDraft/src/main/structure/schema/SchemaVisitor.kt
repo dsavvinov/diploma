@@ -7,7 +7,6 @@ import main.structure.general.EsVariable
 import main.structure.schema.effects.*
 import main.structure.schema.operators.*
 
-// TODO: think about selective visitor
 interface SchemaVisitor<out T> {
 
     // Generic nodes

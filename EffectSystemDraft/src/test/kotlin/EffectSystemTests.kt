@@ -3,12 +3,13 @@ package test.kotlin
 import main.api.dsl.invoke
 import main.facade.EffectSystem
 import main.facade.EsInfoHolderImpl
-import main.implementations.general.EsVariableImpl
 import main.structure.*
+import main.structure.general.EsVariable
 import main.structure.schema.effects.Returns
 import main.structure.schema.effects.Throws
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.Assert.*
 
 class EffectSystemTests {
 
@@ -74,7 +75,7 @@ class EffectSystemTests {
 
     @Test
     fun infersSimpleValueCondition() {
-        val variable = EsVariableImpl("x", EsInt)
+        val variable = EsVariable("x", EsInt)
         val info = EffectSystem.getInfo(
                 assertFunction(isZeroFunction(variable)),
                 Returns(unit, EsUnit)

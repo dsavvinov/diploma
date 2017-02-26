@@ -1,4 +1,4 @@
-package main.implementations.visitors.helpers
+package main.visitors.helpers
 
 import main.structure.general.EsNode
 import main.structure.schema.EffectSchema

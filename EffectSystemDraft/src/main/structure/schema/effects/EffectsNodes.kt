@@ -4,14 +4,28 @@ import main.structure.schema.Effect
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.operators.BinaryOperator
 
-// Tag-type for distinguishing
+/**
+ * Special subclass of effects, that represents particular outcome of
+ * the corresponding code block.
+ */
 interface Outcome : Effect {
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
     fun followsFrom(other: Outcome): Boolean
 }
 
+/**
+ * Simple Effect is a subclass of effects that doesn't influence other effects
+ * on combining. Therefore, Simple Effects have more simple signature of `merge()`
+ */
 interface SimpleEffect : Effect {
+    /**
+     * Template method.
+     * Should return `true` iff `effect` can be combined with `this`.
+     * In most cases, for class X : SimpleEffect this should be implemented
+     * as `fun isCombinable(effect: Effect) = effect is X`
+     */
     fun isCombinable(effect: Effect) : Boolean
+
     fun merge(right: SimpleEffect) : SimpleEffect
 
     override fun merge(left: List<Effect>, right: List<Effect>, flags: EffectsPipelineFlags, operator: BinaryOperator): List<Effect> {

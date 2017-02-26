@@ -1,4 +1,4 @@
-package main.implementations.visitors
+package main.visitors
 
 import main.structure.call.*
 import main.structure.general.EsConstant
@@ -6,12 +6,11 @@ import main.structure.general.EsNode
 import main.structure.general.EsVariable
 import main.structure.schema.EffectSchema
 
-class EffectSchemaGenerator : CallTreeVisitor<EsNode> {
-    override fun visit(node: CtNode): EsNode {
-        // TODO: stub here!
-        throw IllegalStateException("bad!")
-    }
 
+/**
+ * Generates tree of effect schemas given a call-tree
+ */
+class EffectSchemaGenerator : CallTreeVisitor<EsNode> {
     override fun visit(call: CtCall): EsNode {
         val basicSchema = call.function.schema
 

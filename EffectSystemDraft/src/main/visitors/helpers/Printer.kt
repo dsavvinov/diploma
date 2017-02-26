@@ -1,4 +1,4 @@
-package main.implementations.visitors.helpers
+package main.visitors.helpers
 
 import main.structure.general.EsConstant
 import main.structure.general.EsType

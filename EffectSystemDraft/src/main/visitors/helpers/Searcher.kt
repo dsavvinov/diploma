@@ -1,4 +1,4 @@
-package main.implementations.visitors.helpers
+package main.visitors.helpers
 
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
@@ -6,7 +6,9 @@ import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
+import main.structure.schema.effects.Outcome
 import main.structure.schema.effects.Returns
+import main.structure.schema.effects.Throws
 import main.structure.schema.operators.BinaryOperator
 import main.structure.schema.operators.UnaryOperator
 
@@ -54,6 +56,8 @@ fun (EsNode).findAll(predicate: (EsNode) -> Boolean): List<EsNode> =
 
 fun (EsNode).firstOrNull(predicate: (EsNode) -> Boolean): EsNode? =
         findAll(predicate).firstOrNull()
+
+fun (EsNode).getOutcome() : Outcome = firstOrNull { it is Returns || it is Throws } as Outcome
 
 fun (EsNode).contains(predicate: (EsNode) -> Boolean) =
         findAll(predicate).isNotEmpty()

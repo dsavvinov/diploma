@@ -1,6 +1,5 @@
-package main.implementations.visitors.helpers
+package main.visitors.helpers
 
-import main.implementations.EffectSchemaImpl
 import main.structure.general.EsNode
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
@@ -13,7 +12,7 @@ class Transformer(val transform: (EsNode) -> EsNode) : SchemaVisitor<EsNode> {
     override fun visit(node: EsNode): EsNode = transform(node)
 
     override fun visit(schema: EffectSchema): EsNode =
-            EffectSchemaImpl(schema.clauses.map { it.accept(this) as Imply })
+            EffectSchema(schema.clauses.map { it.accept(this) as Imply })
                     .let(transform)
 
     override fun visit(binaryOperator: BinaryOperator): EsNode =

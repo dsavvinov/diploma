@@ -1,10 +1,10 @@
-package main.implementations.visitors.helpers
+package main.visitors.helpers
 
-import main.implementations.EffectSchemaImpl
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
+import main.structure.lift
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.effects.Calls
@@ -18,7 +18,7 @@ class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
     override fun visit(schema: EffectSchema): EsNode? {
         if (!predicate(schema)) return null
 
-        return EffectSchemaImpl(
+        return EffectSchema(
                 schema.clauses.map { it.accept(this) }.filterIsInstance<Imply>()
         )
     }
@@ -76,3 +76,5 @@ class Filterer(val predicate: (EsNode) -> Boolean) : SchemaVisitor<EsNode?> {
 }
 
 fun (EsNode).filter(predicate: (EsNode) -> Boolean): EsNode? = Filterer(predicate).let { accept(it) }
+
+fun (Imply).removeReturns(): Imply = Imply(left, right.filter { it !is Returns } ?: true.lift())

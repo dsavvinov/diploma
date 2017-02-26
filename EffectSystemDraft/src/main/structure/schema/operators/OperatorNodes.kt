@@ -1,19 +1,13 @@
 package main.structure.schema.operators
 
-import main.implementations.EffectSchemaImpl
-import main.implementations.visitors.and
-import main.implementations.visitors.helpers.print
-import main.implementations.visitors.helpers.transformReturn
-import main.structure.general.EsConstant
 import main.structure.general.EsNode
-import main.structure.general.EsType
-import main.structure.general.EsVariable
-import main.structure.lift
 import main.structure.schema.EffectSchema
 import main.structure.schema.Operator
 import main.structure.schema.SchemaVisitor
+import main.structure.schema.Term
 import main.structure.schema.effects.EffectsPipelineFlags
 import main.structure.schema.effects.Returns
+import main.visitors.helpers.transformReturn
 
 interface UnaryOperator : Operator {
     val arg: EsNode
@@ -31,10 +25,10 @@ interface UnaryOperator : Operator {
 
         val schema = arg as EffectSchema
         val newClauses = schema.clauses.map {
-            (it as Imply).transformReturn { Returns(newInstance(it.value), it.type) }
+            it.transformReturn { Returns(newInstance(it.value), it.type) }
         }
 
-        return EffectSchemaImpl(newClauses)
+        return EffectSchema(newClauses)
     }
 }
 
@@ -48,44 +42,25 @@ interface BinaryOperator : Operator {
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
 
     override fun flatten(): EsNode {
-        val leftSchema: EffectSchema = left.castToSchema()
-        val rightSchema: EffectSchema = right.castToSchema()
+        if (left !is Term || right !is Term) return this
+
+        val leftSchema: EffectSchema = (left as Term).castToSchema()
+        val rightSchema: EffectSchema = (right as Term).castToSchema()
 
         return leftSchema.flattenWith(rightSchema, operator = this)
     }
 }
 
-fun (EsNode).castToSchema(): EffectSchema {
-    return when (this) {
-        is EffectSchema -> this
-        is EsVariable -> this.castToSchema()
-        is EsConstant -> this.castToSchema()
-        else -> throw IllegalArgumentException("Type doesn't support casting to ES: $this")
-    }
-}
-
 private fun (EffectSchema).flattenWith(rightSchema: EffectSchema, operator: BinaryOperator): EffectSchema {
-//    println("Flattening:")
-//    println(this.print())
-//    println("and")
-//    println(rightSchema.print())
-
     val newClauses = rightSchema.clauses.flatMap { rightClause ->
         this.clauses.map { leftClause ->
             val flags = EffectsPipelineFlags()
-            val left = (leftClause as Imply).left.and((rightClause as Imply).left)
+            val left = leftClause.left.and(rightClause.left)
             val right = leftClause.effectsAsList().flatMap {
                 it.merge(leftClause.effectsAsList(), rightClause.effectsAsList(), flags, operator)
             }
             Imply(left, right)
         }
     }
-
-    val result = EffectSchemaImpl(newClauses)
-//    println("result:")
-//    println(result.print())
-//    println("================")
-//    println()
-
-    return EffectSchemaImpl(newClauses)
+    return EffectSchema(newClauses)
 }

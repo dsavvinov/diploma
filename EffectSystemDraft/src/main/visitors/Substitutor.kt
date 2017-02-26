@@ -1,6 +1,5 @@
-package main.implementations.visitors
+package main.visitors
 
-import main.implementations.EffectSchemaImpl
 import main.structure.general.EsFunction
 import main.structure.general.EsNode
 import main.structure.general.EsVariable
@@ -10,13 +9,18 @@ import main.structure.schema.operators.BinaryOperator
 import main.structure.schema.operators.Imply
 import main.structure.schema.operators.UnaryOperator
 
-// TODO: can we somehow get rid of casts?
+/**
+ * Visits EffectSchema-tree and substitutes every occurence
+ * of a given set of variables with corresponding node.
+ *
+ * Generally, used when we want to bind call-arguments to formal arguments.
+ */
 class Substitutor(val substs: Map<EsVariable, EsNode>) : SchemaVisitor<EsNode> {
     override fun visit(node: EsNode): EsNode = node
 
     override fun visit(schema: EffectSchema): EsNode {
         val substitutedEffects = schema.clauses.map { it.accept(this) as Imply }
-        return EffectSchemaImpl(substitutedEffects)
+        return EffectSchema(substitutedEffects)
     }
 
     override fun visit(binaryOperator: BinaryOperator): EsNode =

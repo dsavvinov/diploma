@@ -1,16 +1,15 @@
 package main.structure.schema.operators
 
-import main.implementations.EffectSchemaImpl
-import main.implementations.visitors.helpers.transform
 import main.structure.EsBoolean
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
-import main.structure.general.EsVariable
 import main.structure.lift
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
+import main.structure.schema.Term
 import main.structure.schema.effects.Returns
+import main.visitors.helpers.transform
 
 data class Is(override val left: EsNode, override val right: EsType) : BinaryOperator {
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
@@ -21,33 +20,29 @@ data class Is(override val left: EsNode, override val right: EsType) : BinaryOpe
             return (left.type == right).lift()
         }
 
-        // TODO: think!
-        if (left is EsVariable) {
-            return (left.type == right).lift()
-        }
-
         return this
     }
 
     override fun flatten(): EsNode {
+        if (left !is Term) return this
+
         val leftSchema: EffectSchema = left.castToSchema()
 
         val combinedClauses = mutableListOf<Imply>()
 
-        // TODO: this is not flattening! Rewrite
-        for (clause in leftSchema.clauses) {
-            val rewritedRhs = (clause as Imply).right.transform {
+        for ((lhs, rhs) in leftSchema.clauses) {
+            val rewritedRhs = rhs.transform {
                 if (it !is Returns) {
                     return@transform it
                 }
 
-                // Otherwise evalaute Is-operator and update Returns-clause accordingly
-                return@transform Returns((it.type == right).lift(), EsBoolean)
+                // Otherwise evaluate Is-operator and update Returns-clause accordingly
+                return@transform Returns(Is(it.value, right), EsBoolean)
             }
 
-            combinedClauses += Imply(clause.left, rewritedRhs)
+            combinedClauses += Imply(lhs, rewritedRhs)
         }
 
-        return EffectSchemaImpl(combinedClauses)
+        return EffectSchema(combinedClauses)
     }
 }

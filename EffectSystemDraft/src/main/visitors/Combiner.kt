@@ -1,24 +1,22 @@
-package main.implementations.visitors
+package main.visitors
 
-import main.implementations.EffectSchemaImpl
-import main.implementations.visitors.helpers.filter
-import main.implementations.visitors.helpers.firstOrNull
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
 import main.structure.general.EsType
 import main.structure.general.EsVariable
-import main.structure.lift
 import main.structure.schema.EffectSchema
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.effects.Calls
-import main.structure.schema.effects.Outcome
 import main.structure.schema.effects.Returns
 import main.structure.schema.effects.Throws
-import main.structure.schema.operators.And
 import main.structure.schema.operators.BinaryOperator
 import main.structure.schema.operators.Imply
 import main.structure.schema.operators.UnaryOperator
 
+/**
+ * Tries to flatten a given EffectSchema-tree, that is,
+ * returned arg will not contain any nested effect schemas.
+ */
 class Combiner : SchemaVisitor<EsNode> {
     override fun visit(schema: EffectSchema): EsNode {
         val evaluatedEffects = schema.clauses.flatMap {
@@ -30,7 +28,7 @@ class Combiner : SchemaVisitor<EsNode> {
             }
         }
 
-        return EffectSchemaImpl(evaluatedEffects)
+        return EffectSchema(evaluatedEffects)
     }
 
     override fun visit(variable: EsVariable): EsNode = variable
@@ -63,20 +61,3 @@ class Combiner : SchemaVisitor<EsNode> {
 }
 
 fun (EsNode).flatten() : EsNode = Combiner().let { accept(it) }
-
-// TODO: another example :)
-fun (EsNode).getOutcome() : Outcome = firstOrNull { it is Returns || it is Throws } as Outcome
-
-
-fun (Imply).removeOutcome() : Imply {
-    val conclusionWithoutOutcome = right.filter { it !is Returns && it !is Throws } ?: true.lift()
-    return Imply(left, conclusionWithoutOutcome)
-}
-
-fun (Imply).removeReturns(): Imply = Imply(left, right.filter { it !is Returns } ?: true.lift())
-
-fun (EsNode).and(node: EsNode) : EsNode {
-    if (this == true.lift()) return node
-    if (node == true.lift()) return this
-    return And(this, node)
-}

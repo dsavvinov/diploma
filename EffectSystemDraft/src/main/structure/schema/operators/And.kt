@@ -27,3 +27,9 @@ data class And(override val left: EsNode, override val right: EsNode) : BinaryOp
         return this
     }
 }
+
+fun (EsNode).and(node: EsNode) : EsNode {
+    if (this == true.lift()) return node
+    if (node == true.lift()) return this
+    return And(this, node)
+}

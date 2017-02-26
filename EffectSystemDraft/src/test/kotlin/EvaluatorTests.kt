@@ -1,13 +1,13 @@
 package test.kotlin
 
 import main.api.dsl.invoke
-import main.implementations.general.EsVariableImpl
-import main.implementations.visitors.flatten
-import main.implementations.visitors.evaluate
-import main.implementations.visitors.generateEffectSchema
-import main.implementations.visitors.helpers.print
+import main.visitors.evaluate
+import main.visitors.flatten
+import main.visitors.generateEffectSchema
+import main.visitors.helpers.print
 import main.structure.EsInt
 import main.structure.call.CtCall
+import main.structure.general.EsVariable
 import main.structure.lift
 import main.structure.schema.EffectSchema
 import org.junit.Test
@@ -62,6 +62,6 @@ class EvaluatorTests {
 
     @Test
     fun shouldEvaluateVar() {
-        runTest { assertFunction(isZeroFunction(EsVariableImpl("x", EsInt))) }
+        runTest { assertFunction(isZeroFunction(EsVariable("x", EsInt))) }
     }
 }

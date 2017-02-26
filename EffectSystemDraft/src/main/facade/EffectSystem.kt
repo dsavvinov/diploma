@@ -1,6 +1,5 @@
 package main.facade
 
-import main.implementations.visitors.*
 import main.structure.call.CtCall
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
@@ -8,8 +7,15 @@ import main.structure.general.EsType
 import main.structure.general.EsVariable
 import main.structure.schema.EffectSchema
 import main.structure.schema.effects.Outcome
-import main.structure.schema.operators.Imply
+import main.visitors.collect
+import main.visitors.evaluate
+import main.visitors.flatten
+import main.visitors.generateEffectSchema
+import main.visitors.helpers.getOutcome
 
+/**
+ * Entry-point of EffectSystem. Provides simple interface for compiler.
+ */
 object EffectSystem {
     fun getInfo(call: CtCall, outcome: Outcome): EsInfoHolder? {
         val basicEffectSchema = call.generateEffectSchema()
@@ -28,7 +34,7 @@ object EffectSystem {
             val clauseOutcome = clause.getOutcome()
             if (outcome.followsFrom(clauseOutcome)) {
                 feasible = true
-                (clause as Imply).left.collect(varValues, varTypes)
+                clause.left.collect(varValues, varTypes)
             }
         }
 

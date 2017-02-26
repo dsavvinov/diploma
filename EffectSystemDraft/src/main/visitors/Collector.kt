@@ -1,4 +1,4 @@
-package main.implementations.visitors
+package main.visitors
 
 import main.structure.general.EsConstant
 import main.structure.general.EsNode
@@ -7,6 +7,9 @@ import main.structure.general.EsVariable
 import main.structure.schema.SchemaVisitor
 import main.structure.schema.operators.*
 
+/**
+ * Collects statements about variables into given mutable maps
+ */
 data class Collector(
         val varsValues: MutableMap<EsVariable, EsConstant>,
         val varsTypes: MutableMap<EsVariable, EsType>) : SchemaVisitor<Unit>
