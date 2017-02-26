@@ -40,9 +40,9 @@ data class Imply(override val left: EsNode, override val right: EsNode) : Binary
     }
 
     override fun reduce(): EsNode {
-        if (left == true.lift()) {
-            return right
-        }
+//        if (left == true.lift()) {
+//            return right
+//        }
         return this
     }
 

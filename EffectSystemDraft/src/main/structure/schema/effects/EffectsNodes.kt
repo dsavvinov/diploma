@@ -7,6 +7,7 @@ import main.structure.schema.operators.BinaryOperator
 // Tag-type for distinguishing
 interface Outcome : Effect {
     override fun <T> accept(visitor: SchemaVisitor<T>): T = visitor.visit(this)
+    fun followsFrom(other: Outcome): Boolean
 }
 
 interface SimpleEffect : Effect {

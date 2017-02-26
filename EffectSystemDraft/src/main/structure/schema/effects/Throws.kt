@@ -12,4 +12,11 @@ data class Throws(val exception: Any?) : Outcome {
         flags.veto()
         return left
     }
+
+    override fun followsFrom(other: Outcome): Boolean {
+        if (other !is Throws) return false
+
+        // TODO: insert proper subtyping here
+        return exception == other.exception
+    }
 }
