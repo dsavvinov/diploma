@@ -401,7 +401,7 @@ Things to address:
 
 - Аппроксиматор + список конечного состояния
 - ~~Refactor Is~~. **DONE**
-- Refactor `And` into `Cons` in list of side-effects (or maybe even use list or whatever)
+- ~~Refactor `And` into `Cons` in list of side-effects (or maybe even use list or whatever)~~ **DONE**
 - ~~Refactor repository~~ - **DONE**
 - ~~Как транслировать встроенные функции типа ==, is, и т.д.?~~ **DONE**
   - Можно написать фейковые функции для них, и вкорячить в `EffectSchemaGenerator` отдельным костылем
@@ -432,10 +432,105 @@ Things to address:
   - Кажется, что пора бы заиметь некоторый notion чего-то, у чего могут быть сайд-эффекты. Например, `Term` очень похож на именно эту самую абстракцию, только недодуманную до конца. 
   - Однако `Term` не может быть той самой абстракцией, т.к. у `EffectSchema` нет `Outcome`
   - *Идея*: `EffectSchema` -- не терм. Но любой терм можно преобразовать в эффект схему (ровно также, как конверсия `List<T> -> T` не очевидна, а вот `T -> List<T>` вполне тривиальна)
-  - Т.е. `EffectSchema` это набор чего-то, у чего есть сайд-эффекты
+  - Т.е. `Term` это набор чего-то, у чего есть сайд-эффекты
   - Но это, на секундочку, `Imply` в наших теримнах
   - Значит, нужно просто отерафачить `Imply` в какой-нибудь `Clause` и выпилить его наследования от бинопа
     - Хотелось бы сделать нечто в духе: `data class Imply(val premise: EsNode, val effects: List<Effect>, val outcome: Outcome)`.
     - Проблема в том, что у `Imply` бывают некоторые очень неудобные промежуточные состояния в ходе вычислений, в то время как `effects, outcome` бывают только у плоского `Imply`
     - Так что придется реализовывать его как `data class Imply(val left: EsNode, val right: EsNode)` с доп. геттерами, которые будут возвращать nullable-значения
     - И тогда, в принципе, можно его по праву считать и `BinaryOperator`
+**NB**. Осталось такое ощущение, что выпиливание `Outcome` в отдельную иерархию было зря-зря.
+
+## 07.03.2017
+
+Some more refactoring
+
+## 09.03.2017
+
+TODO: 
+- Аппроксиматор + список конечного состояния
+- Придумать чето с call-by-name
+- Придумать чето с return-values (чтобы можно было писать всякие утверждение про результаты коллов)
+- ~~Внимательно подумать про захваты переменных и скоупы. Пока что переменные сравниваются по имени-значению, что означает, что вероятность коллизии при обходе поддерева крайне высока. **Возможно, переход на `DataFlowValue` решит это**~~
+- Какой-то объект для обозначения неизвестности.
+  - Считать, что он всегда завершается и это все, что мы о нем знаем
+- `castToSchema()` -- formalize, think carefully, prove that it's OK
+
+
+### Грамматика
+
+start
+effectSchema
+  : clause { SEMI+ }
+  ;
+
+
+clause
+  : expression "->" effectList
+  ;
+
+expression
+  : binaryOperatorCall
+  : unaryOperatorCall
+  : isExpression
+  : literalConstant
+  : SimpleName
+  ;
+
+binaryOperatorCall
+  : expression binaryOperator expression
+  ;
+
+unaryOperatorCall
+  : unaryOperator expression
+  ;
+
+binaryOperator
+  : "&&"
+  : "||"
+  : "=="
+  ;
+
+unaryOperator
+  : "!"
+
+isExpression
+  : expression "is" type
+
+type
+  : SimpleName
+
+literalConstant
+  : "true" | "false"
+  : IntegerLiteral
+  : "\"" stringElement* "\""
+  : "null"
+  ;
+
+stringElement
+  : RegularStringPart | EscapeSequence
+  ;
+
+Digit : ["0".."9"];
+
+IntegerLiteral
+  : Digit (Digit | "_")*
+  ;
+
+RegularStringPart
+  : <any character other than backslash, quote, $ or newline>
+  ;
+
+EscapeSequence
+  : "\" <any character other than newline>
+  
+
+## 22.03.2017
+
+Вопросы:
+  - Хорошо ли создавать `DataFlowInfo` через `DelegatingDataFlowInfo`?
+  - Нормально ли, что у `DelegatingDataFlowInfo` поле `parent` изначально выставляется в
+    `null` и потом никогда не меняется?
+  - Правильно ли я понимаю, что в котлиновском дата-флоу отсуствует понятия "значения" переменной (кроме как для enum-чиков)? Т.е. если система эффектов каким-то раком вывела, что такая-то переменная равна, например, 42, то в дата-флоу это никак не протащить?
+  - Дизайновый вопрос. Вот у меня есть `Collector`, который в мапки собирает всякие пары типа переменная-тип, переменная-значение, переменная-другая переменная. А потом по этим мапкам хожу еще раз и делаю всякие апдейты. Может, проще коллектору отдать `DataFlowInfo` и пусть он сам на нем дергает всякие `equate`, `establishSubtyping` и т.д.?
+  - На этапе анализа колла мы также можем понять, что запрашиваемый исход вообще никогда не исполняется. Нужно ли это как-то артикулировать?
