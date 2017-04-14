@@ -31,7 +31,6 @@ object AssertLike {
 
     fun assertWithSimpleCondition(t: Any?) {
         myAssert(t is String)
-
         t.length
 
         myAssert(t !is String)
