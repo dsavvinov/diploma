@@ -5,10 +5,9 @@ package smartcasts
  */
 
 object When {
-    // TODO: add types to the possible arg of Returns in grammar
     @Effects("""
-        x == null -> Returns "blabla";
-        x != null -> Returns 2
+        x == null -> Returns("blabla");
+        x != null -> Returns(2)
     """)
     fun foo(x: Int?): Any? {
         x ?: return "Wrong Input"
@@ -16,8 +15,8 @@ object When {
     }
 
     @Effects("""
-        t is String -> Returns "";
-        t is Int -> Returns 0;
+        t is String -> Returns("");
+        t is Int -> Returns(0);
         !(t is String && t is Int) -> Throws IllegalArgumentException
     """)
     fun getDefaultValue(t: Any?): Any? {
@@ -26,31 +25,43 @@ object When {
         else throw IllegalArgumentException("")
     }
 
-    @Effects("""true -> Returns "" """)
+    @Effects("""true -> Returns("") """)
     fun getStringDefaultValue() = ""
 
-    @Effects("true -> Returns 0")
+    @Effects("true -> Returns(0)")
     fun getIntDefaultValue() = 0
 
     fun whenSimpleIs(t: Int?) {
         when(foo(t)) {
             is String -> t.toString()
-            else -> t.toString()
+            is Int -> t.and(5)
+            // note: `else` not working
         }
     }
 
     fun whenSimpleCondition(t: Int?) {
         when(foo(t)) {
-            "blabla" -> t.toString()
-            2 -> t.toString()
+            "blabla" -> println(t)
+            2 -> t.and(5)
         // We understand here that we have enumerated all posibilities, so in theory, we can report exhaustive When
+        }
+
+        when (foo(t)) {
+            "blabla" -> println(t)
+            5 -> t.and(5)       // EXPECTED ERROR
         }
     }
 
     fun whenExpressionCondition(t: Any?) {
         when(getDefaultValue(t)) {
-            getStringDefaultValue() -> t.length
-            getIntDefaultValue() -> t.and(0)
+            getIntDefaultValue() -> {
+                t.and(0)
+                t.length        // EXPECTED ERROR
+            }
+            getStringDefaultValue() -> {
+                t.length
+                t.and(0)    // EXPECTED ERROR
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ package smartcasts
 
 object AssertLike {
     @Effects("""
-        condition == true -> Returns unit;
+        condition == true -> Returns(unit);
         condition != true -> Throws AssertionError
     """)
     fun myAssert(condition: Boolean) : Unit {
@@ -15,8 +15,8 @@ object AssertLike {
 
     class IsStringChecker {
         @Effects("""
-            arg is String -> Returns true;
-            arg !is String -> Returns false
+            arg is String -> Returns(true);
+            arg !is String -> Returns(false)
         """)
         operator fun invoke(arg: Any?): Boolean {
             return arg is String
@@ -24,8 +24,8 @@ object AssertLike {
     }
 
     @Effects("""
-        left == right -> Returns true;
-        left != right -> Returns false
+        left == right -> Returns(true);
+        left != right -> Returns(false)
     """)
     fun myEqual(left: Any, right: Any): Boolean = left == right
 
@@ -33,20 +33,31 @@ object AssertLike {
         myAssert(t is String)
 
         t.length
+
+        myAssert(t !is String)
+
+        t.length  // EXPECTED ERROR.
+
+        // Currently, Data Flow doesn't understand that t can't be both String and !String
+        // See example:
+        val x: Any? = null
+        if (x is String && x !is String) {
+            println(x)
+            x.length        // Really?
+        }
     }
 
     @Effects("""
-        x == 0 -> Returns "zero";
-        x == 1 -> Returns 1;
+        x == 0 -> Returns("zero");
+        x == 1 -> Returns(1);
         x != 0 && x != 1 -> Throws InvalidArgumentException
     """)
-    fun bar(x: Int): Any {
+    fun bar(x: Any?): Any {
         TODO()
     }
 
     fun equalityHintsToo(t: Any?) {
         myAssert(t == "foobarbaz")
-
         t.toString()
     }
 
@@ -54,7 +65,6 @@ object AssertLike {
 
     fun assertWithVariable(t: Any?) {
         myAssert(isString(t))
-
         val len = t.length
     }
 
@@ -62,10 +72,7 @@ object AssertLike {
 
     fun nestedMultiargRandomStuff() {
         val isString = IsStringChecker()
-        myAssert(myEqual(
-                left = isString(bar(8)),
-                right = isString(bar(0))
-        ))
+        myAssert(myEqual(isString(bar(1)), isString(bar(0))))
 
         println("blahblah")
     }
