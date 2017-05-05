@@ -53,7 +53,7 @@
 %% основным шрифтом выбирается Unicode версия шрифта Computer Modern с заcечками
 \usepackage{fontspec}
 \setmainfont[Mapping=tex-text]{CMU Serif}
-\newfontfamily{\cyrillicfonttt}{CMU Serif}
+\newfontfamily{\cyrillicfonttt}{CMU Typewriter Text}
 
 %% В XeLaTex заменой известного пакета babel является пакет polyglossia.
 %% Теперь у нас будут переносы слов
@@ -306,3 +306,10 @@
 
 \let\savenumberline\numberline
 \def\numberline#1{\savenumberline{#1.}}
+
+
+%% Пользовательские команды и макросы
+\newcommand{\name}[1]{\textit{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\lang}[1]{\texttt{#1}}
+\newcommand{\definition}[1]{\textbf{#1}}
