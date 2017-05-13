@@ -60,6 +60,10 @@
 \usepackage{polyglossia}
 \setdefaultlanguage{russian}
 
+%% Настраиваем minted для подсветки кода
+\usepackage[cache=false, outputdir=out]{minted}
+\setminted{xleftmargin=\parindent, linenos, autogobble, frame=lines}
+\renewcommand{\theFancyVerbLine}{\arabic{FancyVerbLine}}
 
 %% Отступ в первом абзаце
 \usepackage{indentfirst}
@@ -308,8 +312,16 @@
 \def\numberline#1{\savenumberline{#1.}}
 
 
+%% Теоремы, леммы, определения, др. окружения
+\usepackage{amsthm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Определение}[section]
+
+
 %% Пользовательские команды и макросы
 \newcommand{\name}[1]{\textit{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\lang}[1]{\texttt{#1}}
-\newcommand{\definition}[1]{\textbf{#1}}
+\newcommand{\term}[1]{\textbf{#1}}
+\newcommand{\eng}[1]{\textit{#1}}
