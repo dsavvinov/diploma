@@ -60,19 +60,14 @@
 \usepackage{polyglossia}
 \setdefaultlanguage{russian}
 
-%% Настраиваем minted для подсветки кода
-\usepackage[cache=false, outputdir=out]{minted}
-\setminted{xleftmargin=\parindent, linenos, autogobble, frame=lines}
-\renewcommand{\theFancyVerbLine}{\arabic{FancyVerbLine}}
-
 %% Отступ в первом абзаце
 \usepackage{indentfirst}
 %% Гиперссылки
 \usepackage[colorlinks=true,urlcolor=black,linkcolor=black,filecolor=black,citecolor=black]{hyperref}
 
-%% Включение графических файлов
-%% we don't need to load graphicx since it will be loaded by xunicode (which is loaded by fontspec) 
-\usepackage[titletoc]{appendix}
+%% Колдунство с оформлением приложений
+\usepackage[titletoc, title]{appendix}
+\patchcmd{\appendices}{\quad}{. }{}{}
 
 %% Эта команда добавляет отчеркнутое место для подписи после имени
 %% Аргументы: имя и пояснение под чертой (например, слово "подпись")
@@ -312,12 +307,37 @@
 \def\numberline#1{\savenumberline{#1.}}
 
 
+%% Настраиваем minted для подсветки кода
+\usepackage[cache=false, outputdir=out]{minted}
+\usepackage{listings}
+\setminted{xleftmargin=\parindent, linenos, autogobble, frame=lines, escapeinside=\#\#}
+\renewcommand{\theFancyVerbLine}{\arabic{FancyVerbLine}}
+\newmintinline[kt]{kotlin}{escapeinside=\#\#}
+\newmintinline[es]{text}{escapeinside=//}
+
 %% Теоремы, леммы, определения, др. окружения
+\usepackage{amsmath}
 \usepackage{amsthm}
 
 \theoremstyle{definition}
 \newtheorem{definition}{Определение}[section]
 
+%% Для вложенных схем эффектов
+\newcommand{\schema}[3]{
+    \begin{tabular}{l}
+        \es{schema #1:} \\
+        
+        \ensuremath{
+            \left[ 
+                \mbox{
+                    \begin{tabular}{l} 
+                        #2
+                    \end{tabular}
+                }
+            \right]
+        } #3
+    \end{tabular}
+}
 
 %% Пользовательские команды и макросы
 \newcommand{\name}[1]{\textit{#1}}
@@ -325,3 +345,5 @@
 \newcommand{\lang}[1]{\texttt{#1}}
 \newcommand{\term}[1]{\textbf{#1}}
 \newcommand{\eng}[1]{\textit{#1}}
+
+\newenvironment{scheme}[1][]{\begin{matrix}}{\end{matrix}}
