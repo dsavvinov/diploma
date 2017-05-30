@@ -345,5 +345,6 @@
 \newcommand{\lang}[1]{\texttt{#1}}
 \newcommand{\term}[1]{\textbf{#1}}
 \newcommand{\eng}[1]{\textit{#1}}
+\newcommand{\bigo}[1]{\mathcal{O}(#1)}
 
 \newenvironment{scheme}[1][]{\begin{matrix}}{\end{matrix}}
