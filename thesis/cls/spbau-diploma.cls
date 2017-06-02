@@ -341,6 +341,11 @@
     \end{tabular}
 }
 
+%% Для двух колонок в приложении
+\usepackage{multicol}
+
+\usepackage{framed}
+
 %% Пользовательские команды и макросы
 \newcommand{\name}[1]{\textit{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
