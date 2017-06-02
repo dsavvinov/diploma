@@ -306,6 +306,8 @@
 \let\savenumberline\numberline
 \def\numberline#1{\savenumberline{#1.}}
 
+%% Для более гибких подписей к рисункам и прочей фигне
+\usepackage[justification=centering]{caption}
 
 %% Настраиваем minted для подсветки кода
 \usepackage[cache=false, outputdir=out]{minted}
@@ -346,5 +348,7 @@
 \newcommand{\term}[1]{\textbf{#1}}
 \newcommand{\eng}[1]{\textit{#1}}
 \newcommand{\bigo}[1]{\mathcal{O}(#1)}
-
+\newcommand{\ctx}{\mathcal{C}}
 \newenvironment{scheme}[1][]{\begin{matrix}}{\end{matrix}}
+
+\graphicspath{ {img/} }
